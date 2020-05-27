@@ -40,6 +40,24 @@ app.use(function(req, res, next) {
 
 app.use(express.static(__dirname + '/public/v1'));
 
+const mongoUri = 'mongodb+srv://database:passwordpassword@cluster0-36vuz.mongodb.net/test?retryWrites=true&w=majority';
+if (!mongoUri) {
+  throw new Error(
+    `MongoURI was not supplied.  Make sure you watch the video on setting up Mongo DB!`
+  );
+}
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useCreateIndex: true
+});
+mongoose.connection.on('connected', () => {
+  console.log('Connected to mongo instance');
+});
+mongoose.connection.on('error', err => {
+  console.error('Error connecting to mongo', err);
+});
+
+
 let AuthRoute = require("./routes/v1/AuthRoute");
 
 // Authentication Route
