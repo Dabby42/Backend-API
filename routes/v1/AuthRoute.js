@@ -6,7 +6,7 @@ const AuthValdiator = require('./../../validations/v1/AuthValidator');
 const {authenticate} = AuthController;
 const {validateAuthLogin} = AuthValdiator;
 
-routes.get("/signup",validateAuth, register);
-routes.get("/signin",validateAuthLogin, authenticate);
+routes.post("/signup",validateAuth, register);
+routes.post("/signin",validateAuthLogin, authenticate);
 
 module.exports = routes;

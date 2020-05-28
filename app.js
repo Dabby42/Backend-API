@@ -1,14 +1,16 @@
 //Require all that's needed to power this App
 //adding a few documentation
-const express = require("express");
-const bodyParser = require("body-parser");
-const expressValidator = require("express-validator");
-const path = require("path");
-const fs = require('fs');
-const morgan = require('morgan');
-const rfs = require('rotating-file-stream');
+const rfs              = require('rotating-file-stream'),
+      expressValidator = require("express-validator"),
+      bodyParser       = require("body-parser"),
+      express          = require("express"),
+      morgan           = require('morgan'),
+      path             = require("path"),
+      fs               = require('fs'),
+      app              = express();
 
-const app = express();
+require("dotenv").config();
+let AuthRoute = require("./routes/v1/AuthRoute");
 
 // create a rotating write stream
 const accessLogStream = rfs.createStream('access.log', {
@@ -23,9 +25,9 @@ const accessLogStream = rfs.createStream('access.log', {
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(morgan('combined', { stream: accessLogStream }));
+
 //allowing for serving static files
 app.use(express.static("public"));
-
 app.use(expressValidator());
 
 // allow cors
@@ -40,10 +42,11 @@ app.use(function(req, res, next) {
 
 app.use(express.static(__dirname + '/public/v1'));
 
-const mongoUri = 'mongodb+srv://database:passwordpassword@cluster0-36vuz.mongodb.net/test?retryWrites=true&w=majority';
+//database connection
+const mongoUri = process.env.MONGO_URI;
 if (!mongoUri) {
   throw new Error(
-    `MongoURI was not supplied.  Make sure you watch the video on setting up Mongo DB!`
+    `MongoURI was not supplied.`
   );
 }
 mongoose.connect(mongoUri, {
@@ -58,12 +61,10 @@ mongoose.connection.on('error', err => {
 });
 
 
-let AuthRoute = require("./routes/v1/AuthRoute");
-
 // Authentication Route
 app.use(AuthRoute);
 
 //=========================================================
 //Running the server on Port 3000 default
-let PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT;
 app.listen(PORT, () => {console.log(`App is running on Port ${PORT}`)});
