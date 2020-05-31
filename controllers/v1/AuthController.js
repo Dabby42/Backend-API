@@ -15,7 +15,7 @@ class AuthController extends BaseController{
    */
   static async register(req, res) {
     const {firstName, email, password, lastName } = req.body;
-
+    console.log(req.body);
     try {
       const user = new User({firstName, email, password, lastName });
       await user.save();
@@ -23,9 +23,10 @@ class AuthController extends BaseController{
       let token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,  {
           expiresIn: 86400 // expires in 24 hours
         });
+      // res.send({token})
       return this.success(res,{ token, user }, 'SignUp Successful');
     } catch (err) {
-      return this.actionFailed(res, err.message)
+      return this.actionFailure(res, err.message)
     }
   }
 

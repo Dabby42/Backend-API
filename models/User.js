@@ -8,13 +8,10 @@ let UserSchema = mongoose.Schema({
     type: String,
     unique: true,
   },
-  password: String,
-  profile: { type: mongoose.Schema.Types.ObjectId, ref: "UserProfile" },
-  dateOfCreation: { type: Date, default: Date.now },
-  isActive: { type: Boolean, default: true }
+  password: String
 });
 
-userSchema.pre('save', function(next) {
+UserSchema.pre('save', function(next) {
   const user = this;
   if (!user.isModified('password')) {
     return next();
