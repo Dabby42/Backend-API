@@ -1,12 +1,8 @@
 const mongoose= require("mongoose");
 const secrets= require("./secrets");
 
-const mongoUri = 'mongodb+srv://database:passwordpassword@cluster0-36vuz.mongodb.net/test?retryWrites=true&w=majority';
-if (!mongoUri) {
-  throw new Error(
-    `MongoURI was not supplied.  Make sure you watch the video on setting up Mongo DB!`
-  );
-}
+//connecting to Mongo Db server
+
 mongoose
   .connect(
     secrets.mongo,
