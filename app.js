@@ -1,6 +1,5 @@
 //Require all that's needed to power this App
 //adding a few documentation
-require('./models/User');
 require('./config/dbconnection');
 const rfs              = require('rotating-file-stream'),
       expressValidator = require("express-validator"),
@@ -12,6 +11,8 @@ const rfs              = require('rotating-file-stream'),
       app              = express();
 
 require("dotenv").config();
+
+
 let AuthRoute = require("./routes/v1/AuthRoute");
 
 // create a rotating write stream

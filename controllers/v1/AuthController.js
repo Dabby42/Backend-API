@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const mongoose = require('mongoose');
 const jwt = require("jsonwebtoken");
 const BaseController = require('./BaseController');
-const User = mongoose.model('User');
+const User = require('./../../models/User');
 
 class AuthController extends BaseController{
 

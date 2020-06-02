@@ -32,4 +32,7 @@ UserSchema.pre('save', function(next) {
   });
 });
 
-mongoose.model("User", UserSchema);
+let User = mongoose.model("User", UserSchema);
+
+module.export = User;
+

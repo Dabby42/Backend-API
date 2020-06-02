@@ -8,7 +8,8 @@ mongoose
     secrets.mongo,
     {
       useNewUrlParser: true,
-      useCreateIndex: true
+      useCreateIndex: true,
+      useUnifiedTopology: true
     }
   )
   .then(() => {
