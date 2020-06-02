@@ -10,3 +10,5 @@
 ::1 - - [31/May/2020:10:42:08 +0000] "POST /signup HTTP/1.1" - - "-" "PostmanRuntime/7.25.0"
 ::1 - - [31/May/2020:11:39:40 +0000] "POST /signup HTTP/1.1" - - "-" "PostmanRuntime/7.25.0"
 ::1 - - [31/May/2020:11:42:13 +0000] "POST /signup HTTP/1.1" - - "-" "PostmanRuntime/7.25.0"
+::1 - - [02/Jun/2020:13:11:33 +0000] "POST /signup HTTP/1.1" - - "-" "PostmanRuntime/7.25.0"
+::1 - - [02/Jun/2020:13:12:45 +0000] "POST /signup HTTP/1.1" 404 146 "-" "PostmanRuntime/7.25.0"

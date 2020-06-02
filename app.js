@@ -44,7 +44,7 @@ app.use(function(req, res, next) {
 app.use(express.static(__dirname + '/public/v1'));
 
 // Authentication Route
-app.use(AuthRoute);
+app.use("/v1/auth",AuthRoute);
 
 //=========================================================
 //Running the server on Port 3000 default
