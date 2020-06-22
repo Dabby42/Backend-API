@@ -1,8 +1,7 @@
-const bcrypt = require("bcryptjs");
-const mongoose = require('mongoose');
-const jwt = require("jsonwebtoken");
-const BaseController = require('./BaseController');
-const User = require('./../../models/User');
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import BaseController from './BaseController';
+import User from './../../models/User';
 
 class AuthController extends BaseController{
 
@@ -13,7 +12,7 @@ class AuthController extends BaseController{
    * @apiParam {String} email user's email
    * @apiParam {String} password user's password
    */
-  static async register(req, res) {
+  async register(req, res) {
     const {firstName, email, password, lastName } = req.body;
     console.log(req.body);
     try {
@@ -24,13 +23,13 @@ class AuthController extends BaseController{
           expiresIn: 86400 // expires in 24 hours
         });
       // res.send({token})
-      return this.success(res,{ token, user }, 'SignUp Successful');
+      return super.success(res,{ token, user }, 'SignUp Successful');
     } catch (err) {
-      return this.actionFailure(res, err.message)
+      return super.actionFailure(res, err.message)
     }
   }
 
-  static async authenticate(req, res) {
+  async authenticate(req, res) {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
 
@@ -45,13 +44,13 @@ class AuthController extends BaseController{
             }
           );
 
-          return this.success(res,{ token, user }, 'Login Successful');
+          return super.success(res,{ token, user }, 'Login Successful');
 
         } else {
-          return this.unauthorized(res, 'Invalid Credentials');
+          return super.unauthorized(res, 'Invalid Credentials');
         }
     }else{
-      return this.notFound(res, "Account does not exist");
+      return super.notFound(res, "Account does not exist");
     }
   }
 

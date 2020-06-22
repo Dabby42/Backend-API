@@ -1,23 +1,27 @@
-const mongoose= require("mongoose");
-const secrets= require("./secrets");
+import mongoose from 'mongoose';
+import secrets from './secrets';
+//===========================================
 
-//connecting to Mongo Db server
-
+//===========================================
+//connecting to the Mongo Db Server
+//===========================================
 mongoose
   .connect(
-    secrets.mongo,
-    {
-      useNewUrlParser: true,
+    secrets.mongoUri,
+    { 
+      useNewUrlParser: true, 
+      useUnifiedTopology: true, 
+      useFindAndModify: false,
       useCreateIndex: true,
-      useUnifiedTopology: true
+      user: secrets.mongoUser,
+      pass: secrets.mongoPass,
     }
   )
   .then(() => {
-    console.log('Connected to mongo instance');
-
+    console.log("Successfully connected to Mongo DB!");
   })
   .catch(err => {
-    console.error('Error connecting to mongo', err);
-  })
-
-module.export = mongoose;
+    console.log("Could not connect to MongoDB " + err.message);
+  });
+  
+  module.export = mongoose;

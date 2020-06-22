@@ -1,19 +1,21 @@
-const Helpers = require('../../helpers/helper');
-const {extractErrors, validationFailed} = Helpers;
+import Helpers from '../../helpers/helper';
 
 /**
  * Defines methods for validating Auth functions
  *
  * @class AuthValidator
  */
-class AuthValidator {
+class AuthValidator extends Helpers{
+  constructor(){
+    super();
+  }
     /**
    * validates Auth signup
    * @param {object} req
    * @param {object} res
    * @param {callback} next
    */
-  static validateAuth(req, res, next) {
+  validateAuth(req, res, next) {
     req.check('firstName', 'First Name is required').notEmpty().trim();
     req.check('lastName', 'Last Name is required').notEmpty().trim();
     req.check('email', 'Email field is required').notEmpty().trim().isEmail().withMessage('Invalid email');
@@ -23,7 +25,7 @@ class AuthValidator {
     const errors = req.validationErrors();
 
     if (errors) {
-      return validationFailed(res, extractErrors(errors));
+      return super.validationFailed(res, extractErrors(errors));
     }
     return next();
   }
@@ -34,7 +36,7 @@ class AuthValidator {
    * @param {object} res
    * @param {callback} next
    */
-  static validateAuthLogin(req, res, next) {
+  validateAuthLogin(req, res, next) {
     req.check('email', 'Email field is required')
       .notEmpty().trim()
       .isEmail().withMessage('Invalid email');
@@ -42,7 +44,7 @@ class AuthValidator {
     const errors = req.validationErrors();
 
     if (errors) {
-      return validationFailed(res, extractErrors(errors));
+      return super.validationFailed(res, extractErrors(errors));
     }
     return next();
   }

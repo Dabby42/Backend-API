@@ -12,7 +12,7 @@ class Helpers {
    * @param {object} errors 
    * processes the errors returned by the validator and puts it in required format
    */
-  static extractErrors(errors) {
+  extractErrors(errors) {
     const validationErrors = {};
     errors.map(error => {
         if(validationErrors.hasOwnProperty(error.param)){
@@ -30,7 +30,7 @@ class Helpers {
    * @param {var} num 
    * Checks if value is an integer
    */
-  static isANumber(num) {
+  isANumber(num) {
     return Number.isInteger(Number(num));
   }
 
@@ -40,7 +40,7 @@ class Helpers {
    * @param {object} errors 
    * formats response caused due to form validation
    */
-  static validationFailed(res, errors){
+  validationFailed(res, errors){
 
     let response = {
             status: FAILED,
@@ -58,7 +58,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for not found
    */
-  static notFound(res, message){
+  notFound(res, message){
 
     let response = {
             status: FAILED,
@@ -74,7 +74,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for unauthorized requests
    */
-  static unauthorized(res, message){
+  unauthorized(res, message){
     let response = {
             status: FAILED,
             status_code: HTTP_UNAUTHORIZED, 
@@ -90,7 +90,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for bad requests
    */
-  static badRequest(res, message){
+  badRequest(res, message){
     let response = {
             status: FAILED,
             status_code: HTTP_BAD_REQUEST, 
@@ -106,7 +106,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for successful action that doesn't require data to be sent back
    */
-  static actionSuccess(res, message){
+  actionSuccess(res, message){
     let response = {
             status: SUCCESS,
             status_code: HTTP_OK, 
@@ -122,7 +122,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for failed action that doesn't require data to be sent back
    */
-  static actionFailure(res, message){
+  actionFailure(res, message){
     let response = {
             status: FAILED,
             status_code: HTTP_CONFLICT, 
@@ -138,7 +138,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for forbidden action
    */
-  static forbidden(res, message){
+  forbidden(res, message){
     let response = {
             status: FAILED,
             status_code: HTTP_FORBIDDEN, 
@@ -154,7 +154,7 @@ class Helpers {
    * @param {string} message 
    * Formats response for successful action that requires data to be returned
    */
-  static success(res, data, message = 'successful'){
+  success(res, data, message = 'successful'){
     let response = {
             data,
             status: SUCCESS,

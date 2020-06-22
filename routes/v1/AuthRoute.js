@@ -3,10 +3,8 @@ const routes = express.Router();
 const AuthController = require('./../../controllers/v1/AuthController');
 const AuthValdiator = require('./../../validations/v1/AuthValidator');
 
-const {authenticate} = AuthController;
-const {register} = AuthController;
-const {validateAuthLogin} = AuthValdiator;
-const {validateAuth} = AuthValdiator;
+const {authenticate, register} = new AuthController();
+const {validateAuthLogin, validateAuth} = new AuthValdiator();
 
 routes.post("/signup",validateAuth, register);
 routes.post("/signin",validateAuthLogin, authenticate);
