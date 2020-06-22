@@ -7,6 +7,8 @@ const {authenticate, register} = new AuthController();
 const {validateAuthLogin, validateAuth} = new AuthValdiator();
 
 routes.post("/signup",validateAuth, register);
-routes.post("/signin",validateAuthLogin, authenticate);
+// routes.post("/signin",validateAuthLogin, authenticate);
+
+routes.post('/o/token', validateAuthLogin, authenticate )
 
 module.exports = routes;

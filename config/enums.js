@@ -27,7 +27,11 @@ const enums = {
     OTHERS: 2,
     USERCLAIMS: ['currency', 'service'],
     SUGGESTED_AUTH: 'PIN',
-    CLOUDINARY: 'cloudinary'
+    CLOUDINARY: 'cloudinary',
+    PROVIDER: ['facebook', 'twitter', 'instagram'],
+    FACEBOOK: 'facebook',
+    TWITTER: 'twitter',
+    INSTAGRAM: 'instagram'
 };
 
 module.exports = enums;

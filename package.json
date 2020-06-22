@@ -31,6 +31,7 @@
         "dotenv": "^6.2.0",
         "express": "^4.16.4",
         "express-validator": "^5.3.1",
+        "gatemanjs": "franko4don/gateman#master",
         "fs": "0.0.1-security",
         "is-base64": "^0.1.0",
         "jsonwebtoken": "^8.4.0",
