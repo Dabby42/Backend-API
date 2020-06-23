@@ -38,10 +38,17 @@ const secrets = {
   facebookClientId: process.env.FACEBOOK_CLIENT_ID,
   facebookAppSecret: process.env.FACEBOOK_APP_SECRET,
   facebookRedirectUri: process.env.FACEBOOK_REDIRECT_URI,
+  facebookBaseUrl: process.env.FACEBOOK_BASE_URL,
+
+  instagramClientId: process.env.INSTAGRAM_CLIENT_ID,
+  instagramAppSecret: process.env.INSTAGRAM_APP_SECRET,
+  instagramRedirectUri: process.env.INSTAGRAM_REDIRECT_URI,
+  instagramBaseUrl: process.env.INSTAGRAM_BASE_URL,
 
   twitterConsumerKey: process.env.TWITTER_CONSUMER_KEY,
   twitterConsumerSecret: process.env.TWITTER_CONSUMER_SECRET,
   twitterCallbackUri: process.env.TWITTER_CALLBACK_URI,
+  twitterBaseUrl: process.env.TWITTER_BASE_URL,
 
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY,
   paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY,

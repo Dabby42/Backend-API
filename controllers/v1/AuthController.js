@@ -93,6 +93,44 @@ class AuthController extends BaseController{
   async authenticateFacebook(req, res){
     const {accessToken} = req.body;
     // write facebook implementation for log in and implement long lived token
+    let baseURL = secrets.facebookBaseUrl;
+    
+    try {
+      let longLivedToken = await axios.get(`${baseURL}/oauth/access_token?grant_type=fb_exchange_token&client_id=${secrets.facebookClientId}&client_secret=${secrets.facebookAppSecret}&fb_exchange_token=${accessToken}`)
+      
+      if (longLivedToken) {
+
+        let profile = axios.get(`${baseURL}/me?fields=id,email,last_name,first_name&access_token=${accessToken}`);
+        const user = new User();
+        user.firstName = profile.first_name;
+        user.lastName = profile.last_name;
+        user.email = profile.email;
+        user.socialId = profile.id;
+
+        user.save()
+            .then(result => {
+              console.log(result);
+              res.status(201).json({
+                  message: "User created successfully",
+                  Profile: {
+                      firstName: result.firstName,
+                      lastName: result.lastName,
+                      email: result.email,
+                      socialId: result.socialId,
+                  }
+              })
+            })
+            .catch(err =>{
+              res.send(500).json({
+                error:err
+              })
+            })
+      } else {
+        return null
+      }
+    } catch (error) {
+      return null
+    }
   }
 
   /**
@@ -101,8 +139,46 @@ class AuthController extends BaseController{
    * @param {Object} res 
    */
   async authenticateTwitter(req, res){
-    const {accessToken} = req.body;
+    //access tokens are not explicitly expired
+    const {accessToken, screenName} = req.body;
     // write twitter implementation for log in and implement long lived token
+
+    let baseURL = secrets.twitterBaseUrl;
+    let headers = {
+      'Authorization': `Bearer ${accessToken}`  
+    }
+    
+    try {
+
+      let profile = axios.get(`${baseURL}?usernames=${screenName}&user.fields=name,screen_name,email,id_str`,{ headers});
+      const user = new User();
+      user.firstName = profile.data[0].name;
+      user.lastName = profile.data[0].screen_name;
+      user.email = profile.data[0].email;
+      user.socialId = profile.data[0].id_str;
+
+      user.save()
+          .then(result => {
+            console.log(result);
+            res.status(201).json({
+                message: "User created successfully",
+                Profile: {
+                    firstName: result.firstName,
+                    lastName: result.lastName,
+                    email: result.email,
+                    socialId: result.socialId,
+                }
+            })
+          })
+          .catch(err =>{
+            res.send(500).json({
+              error:err
+            })
+          })
+    } catch (error) {
+      return null
+    }
+
   }
 
   /**
@@ -113,6 +189,41 @@ class AuthController extends BaseController{
   async authenticateInstagram(req, res){
     const {accessToken} = req.body;
     // write instagram implementation for log in and implement long lived token
+    let baseURL = secrets.instagramBaseUrl;
+    
+    try {
+      let longLivedToken = await axios.get(`${baseURL}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
+      
+      if (longLivedToken) {
+
+        let profile = axios.get(`${baseURL}/me?fields=id,username&access_token=${accessToken}`);
+        const user = new User();
+        user.firstName = profile.username;
+        user.socialId = profile.id;
+
+        user.save()
+            .then(result => {
+              console.log(result);
+              res.status(201).json({
+                  message: "User created successfully",
+                  Profile: {
+                      firstName: result.firstName,
+                      socialId: result.socialId,
+                  }
+              })
+            })
+            .catch(err =>{
+              res.send(500).json({
+                error:err
+              })
+            })
+      } else {
+        return null
+      }
+    } catch (error) {
+      return null
+    }
+
   }
 
 
