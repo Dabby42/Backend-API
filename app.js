@@ -1,19 +1,19 @@
 //Require all that's needed to power this App
 //adding a few documentation
-require('./models/User');
-require('./config/dbconnection');
-const rfs              = require('rotating-file-stream'),
-      expressValidator = require("express-validator"),
-      bodyParser       = require("body-parser"),
-      express          = require("express"),
-      morgan           = require('morgan'),
-      path             = require("path"),
-      fs               = require('fs'),
-      app              = express();
+import express from 'express';
+import bodyParser from 'body-parser';
+import expressValidator from 'express-validator';
+import path from 'path';
+import morgan from 'morgan';
+import './config/dbconnection';
+import AuthRoute from './routes/v1/AuthRoute';
+let cors = require('cors');
+import methodOverride from 'method-override';
+import dotenv from 'dotenv';
 
-require("dotenv").config();
-let AuthRoute = require("./routes/v1/AuthRoute");
-
+const rfs  = require('rotating-file-stream');
+const app = express();
+app.use(cors());
 // create a rotating write stream
 const accessLogStream = rfs.createStream('access.log', {
   interval: '1d', // rotate daily
@@ -24,29 +24,53 @@ const accessLogStream = rfs.createStream('access.log', {
 //All Middlewares here
 //=========================================================
 // Tell the bodyparser middleware to accept more data
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({limit: '400mb'}));
+app.use(bodyParser.urlencoded({limit: '400mb', extended: true}));
+
 app.use(morgan('combined', { stream: accessLogStream }));
 
 //allowing for serving static files
-app.use(expressValidator());
+app.use(express.static('public'));
 
-// allow cors
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
+app.use(expressValidator());
+app.use(methodOverride());
+
+process.env.TZ = 'Africa/Lagos';
+
+//default landing:
+app.get('/apidoc', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.use(express.static(__dirname + '/public/v1'));
+//default landing:
+app.get('/payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
+});
+
+//default landing:
+app.get('/rave', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'rave.html'));
+});
 
 // Authentication Route
-app.use(AuthRoute);
+app.use('/v1/auth', AuthRoute);
+
+
+
+//default landing:
+app.all('*', (req, res) => {
+  res.status(404).send({
+    status: 'failed',
+    status_code: 404,
+    message: 'Resource not found'
+  });
+});
+
+dotenv.config();
 
 //=========================================================
 //Running the server on Port 3000 default
-let PORT = process.env.PORT;
+let PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {console.log(`App is running on Port ${PORT}`)});
+
+module.exports = app;

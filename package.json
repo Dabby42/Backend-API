@@ -1,35 +1,46 @@
 {
-    "name": "Abokee",
+    "name": "Scrola",
     "version": "1.0.0",
-    "description": "API for For The Abokee project",
+    "description": "API for For The Scrola project",
     "main": "app.js",
     "scripts": {
-        "start": "node app.js",
-        "dev": "nodemon app.js",
+        "start": "babel-node app.js",
+        "dev": "nodemon --exec babel-node app.js",
         "doc": "apidoc -e \"(node_modules|public)\" -o public/v1/apidoc"
     },
     "keywords": [
         "Api"
     ],
-    "author": "Abokee",
+    "author": "Scrola",
     "license": "ISC",
     "dependencies": {
+        "@babel/core": "^7.10.3",
+        "@babel/node": "^7.10.3",
+        "@babel/plugin-proposal-class-properties": "^7.10.1",
+        "@babel/plugin-transform-runtime": "^7.10.3",
+        "@babel/preset-env": "^7.10.3",
         "apidoc": "^0.17.7",
+        "apidoc-swagger": "^0.3.2",
+        "auto-bind": "^4.0.0",
         "axios": "^0.18.1",
         "bcrypt": "^4.0.1",
         "bcryptjs": "^2.4.3",
         "body-parser": "^1.18.3",
+        "cloudinary": "^1.22.0",
         "cors": "^2.8.5",
         "dotenv": "^6.2.0",
         "express": "^4.16.4",
         "express-validator": "^5.3.1",
+        "gatemanjs": "franko4don/gateman#master",
         "fs": "0.0.1-security",
         "is-base64": "^0.1.0",
         "jsonwebtoken": "^8.4.0",
+        "method-override": "^3.0.0",
         "moment": "^2.24.0",
         "mongoose": "^5.8.3",
         "morgan": "^1.9.1",
         "path": "^0.12.7",
-        "rotating-file-stream": "^2.1.1"
+        "rotating-file-stream": "^2.1.1",
+        "uuid": "^8.1.0"
     }
 }
