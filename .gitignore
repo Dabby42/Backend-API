@@ -3,3 +3,10 @@ node_modules/
 /logs
 logs/
 logs/*
+public/api_project.js
+public/api_data.js
+public/api_data.json
+public/api_project.json
+public/vendor/*
+public/utils/
+parse-apps.config.js
