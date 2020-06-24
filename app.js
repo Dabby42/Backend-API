@@ -6,7 +6,6 @@ import expressValidator from 'express-validator';
 import path from 'path';
 import morgan from 'morgan';
 import './config/dbconnection';
-import AuthRoute from './routes/v1/AuthRoute';
 let cors = require('cors');
 import methodOverride from 'method-override';
 import dotenv from 'dotenv';
@@ -53,7 +52,10 @@ app.get('/rave', (req, res) => {
 });
 
 // Authentication Route
-app.use('/v1/auth', AuthRoute);
+app.use('/v1/auth', require('./routes/v1/AuthRoute'));
+
+// Article Route
+app.use('/v1/article', require('./routes/v1/ArticleRoute'));
 
 
 
