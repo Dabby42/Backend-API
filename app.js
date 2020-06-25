@@ -62,8 +62,12 @@ app.use('/v1/interest', require('./routes/v1/InterestRoute'));
 
 // Subscription Route
 app.use('/v1/subscription', require('./routes/v1/SubscriptionRoute'));
+
 // Bookmark Route
 app.use('/v1/bookmark', require('./routes/v1/BookmarkRoute'));
+
+// Transaction
+app.use('/v1/transaction', require('./routes/v1/TransactionRoute'));
 
 //default landing:
 app.all('*', (req, res) => {

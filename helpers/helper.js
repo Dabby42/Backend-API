@@ -1,5 +1,8 @@
 /* istanbul ignore file */
 const constants = require('../config/constants');
+import Transaction from './../models/Transaction';
+import dotenv from 'dotenv';
+dotenv.config();
 const {
     FAILED, SUCCESS, HTTP_UNPROCESSABLE_ENTITY,
     HTTP_NOT_FOUND, HTTP_BAD_REQUEST, HTTP_CONFLICT,
@@ -7,6 +10,7 @@ const {
   } = constants;
 
 class Helpers {
+  
   /**
    * 
    * @param {object} errors 
@@ -163,6 +167,55 @@ class Helpers {
             
     }
     return res.status(HTTP_OK).send(response);
+  }
+
+  getPaginationOptions(req){
+    let page = parseInt(req.query.page, 10) || 1;
+    let limit = parseInt(req.query.limit, 10) || 5;
+    let skipper = page > 0 ? (page - 1) * limit: page * limit;
+    return {
+        page, limit, skipper
+    }
+    
+  }
+
+  getMeta(pageOptions, total){
+      return {
+        totalPages: total % pageOptions.limit == 0 ? parseInt(total / pageOptions.limit) : parseInt(total / pageOptions.limit) + 1,
+        limit: pageOptions.limit,
+        page: pageOptions.page
+    }
+  }
+
+   /**
+   * Generates random n digit invite code that is unique to a user
+   * @param {int} length 
+   */
+  async randomString(length = 10){
+    let alpha = "ABCDEFGHIJKLMNOPQRSTUPWXYZ0123456789abcdefghijklmnopqrstuvwxyz".split('');
+    let code = '';
+    for(let i = 0; i < length; i++){
+      // code += this.getRandomInt(alpha.length - 1);
+      code += alpha[Math.floor(Math.random() * Math.floor(alpha.length - 1))];
+    }
+    return code;
+    
+  }
+
+  async getReference(){
+    let reference = this.randomString()
+    try{
+      
+      let exists = await Transaction.findOne({reference});
+      if(exists){
+        this.getReference();
+      }else{
+        return reference
+      }
+    }catch(err){
+      return reference
+    }
+    
   }
 }
 
