@@ -17,9 +17,9 @@ class InterestValidator extends Helpers{
    * @param {callback} next
    */
   validateInterest(req, res, next) {
-    const {name, image} = req.body;
+    const {type, image} = req.body;
    
-    req.check('name', 'name field is required').notEmpty().trim();
+    req.check('type', 'type field is required').notEmpty().trim();
 
     req.check('image', 'image must be a base64 string')
         .custom(() => {

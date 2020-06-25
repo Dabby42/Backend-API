@@ -176,5 +176,65 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "./controllers/v1/AuthController.js",
     "groupTitle": "Auth"
+  },
+  {
+    "type": "post",
+    "url": "/v1/interest",
+    "title": "Create Interest",
+    "name": "Create_Interest",
+    "group": "Interest",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "image",
+            "description": "<p>Interest Image</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Name of the Interest</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./controllers/v1/InterestController.js",
+    "groupTitle": "Interest"
+  },
+  {
+    "type": "get",
+    "url": "/v1/interest/:id",
+    "title": "Get User's Interest",
+    "name": "Get_User_s_Interest",
+    "group": "Interest",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/InterestController.js",
+    "groupTitle": "Interest"
+  },
+  {
+    "type": "delete",
+    "url": "/v1/interest/:id",
+    "title": "Remove Interest",
+    "name": "Remove_Interest",
+    "group": "Interest",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/InterestController.js",
+    "groupTitle": "Interest"
+  },
+  {
+    "type": "patch",
+    "url": "/v1/interest/restore/:id",
+    "title": "Restore Interest",
+    "name": "Restore_Interest",
+    "group": "Interest",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/InterestController.js",
+    "groupTitle": "Interest"
   }
 ] });
