@@ -57,7 +57,8 @@ app.use('/v1/auth', require('./routes/v1/AuthRoute'));
 // Article Route
 app.use('/v1/article', require('./routes/v1/ArticleRoute'));
 
-
+// Interest Route
+app.use('/v1/interest', require('./routes/v1/InterestRoute'));
 
 //default landing:
 app.all('*', (req, res) => {
@@ -72,7 +73,7 @@ dotenv.config();
 
 //=========================================================
 //Running the server on Port 3000 default
-let PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {console.log(`App is running on Port ${PORT}`)});
 
 module.exports = app;

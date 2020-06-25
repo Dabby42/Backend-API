@@ -36,7 +36,7 @@ class AuthController extends BaseController{
   async authenticate(req, res){
     const { provider } = req.body;
     try{
-      const result = null;
+      let result = null
       // switch to trigger the correct provider
       switch(provider){
         case FACEBOOK:
@@ -100,7 +100,7 @@ class AuthController extends BaseController{
       
       if (longLivedToken) {
 
-        let profile = axios.get(`${baseURL}/me?fields=id,email,last_name,first_name&access_token=${accessToken}`);
+        let profile = axios.get(`${baseURL}/me?fields=id,email,last_name,first_name&access_token=${longLivedToken}`);
         const user = new User();
         user.firstName = profile.first_name;
         user.lastName = profile.last_name;
@@ -108,27 +108,22 @@ class AuthController extends BaseController{
         user.socialId = profile.id;
 
         user.save()
-            .then(result => {
-              console.log(result);
+            .then(user => {
+              console.log(user);
               res.status(201).json({
                   message: "User created successfully",
                   Profile: {
-                      firstName: result.firstName,
-                      lastName: result.lastName,
-                      email: result.email,
-                      socialId: result.socialId,
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                      email: user.email,
+                      socialId: user.socialId,
                   }
-              })
-            })
-            .catch(err =>{
-              res.send(500).json({
-                error:err
               })
             })
       } else {
         return null
       }
-    } catch (error) {
+    } catch (err) {
       return null
     }
   }
@@ -170,11 +165,6 @@ class AuthController extends BaseController{
                 }
             })
           })
-          .catch(err =>{
-            res.send(500).json({
-              error:err
-            })
-          })
     } catch (error) {
       return null
     }
@@ -196,7 +186,7 @@ class AuthController extends BaseController{
       
       if (longLivedToken) {
 
-        let profile = axios.get(`${baseURL}/me?fields=id,username&access_token=${accessToken}`);
+        let profile = axios.get(`${baseURL}/me?fields=id,username&access_token=${longLivedToken}`);
         const user = new User();
         user.firstName = profile.username;
         user.socialId = profile.id;
@@ -210,11 +200,6 @@ class AuthController extends BaseController{
                       firstName: result.firstName,
                       socialId: result.socialId,
                   }
-              })
-            })
-            .catch(err =>{
-              res.send(500).json({
-                error:err
               })
             })
       } else {

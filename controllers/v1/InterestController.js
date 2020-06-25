@@ -13,20 +13,25 @@ class InterestController extends BaseController{
         autoBind(this);
     }
 
+    /**
+   * @api {post} /v1/interest Create Interest
+   * @apiName Create Interest
+   * @apiGroup Interest
+   * @apiParam {String} image Interest Image
+   * @apiParam {String} name Name of the Interest
+   */
     async createInterest(req, res) {
         let {image, name} = req.body;
 
-        const service = new imageService('cloudinary');
-
         try {
+            const service = new imageService('cloudinary');
             // checks if base64 image version exists and uploads to cloudinary
             if(image)image = await service.uploadBase64Image(image);
-            let data = {};
-            data.name = name
+            let data = {name};
 
             // checks if image uploaded and add it to the data
             if(image) data.image = image.url;
-            
+
             let interest = new Interest(data);
             await interest.save();
 
@@ -38,27 +43,38 @@ class InterestController extends BaseController{
         
     }
 
+    /**
+     * @api {get} /v1/interest/:id Get User's Interest
+     * @apiName Get User's Interest
+     * @apiGroup Interest
+     */
+
     async getInterest(req, res) {
         const { id } = req.body;
         try {
-            let interest = await interest.find({_id: id});
+            let interest = await Interest.findById({_id: id});
             let data = interest.name;
-            let UserInterest = new UserInterest();
-            UserInterest.interest = data;
+            let userInterest = new UserInterest();
+            userInterest.interest = data;
 
-            await UserInterest.save();
+            await userInterest.save();
             return super.actionSuccess(res, 'User Interest Created'); 
         } catch (error) {
-            console.log(err);
+            console.log(error);
             return super.actionFailure(res, `Couldn't get interest`);
         }
         
     }
 
-    async deleteInterest(req, res) {
+    /**
+     * @api {delete} /v1/interest/:id Remove Interest
+     * @apiName Remove Interest
+     * @apiGroup Interest
+     */
+    async removeInterest(req, res) {
         const { id } = req.body;
         try{
-            let interest = await interest.find({_id: id});
+            let userInterest = await UserInterest.findOneAndUpdate({_id: id}, {interest: null});
             return super.actionSuccess(res, 'Interest Deleted');
 
         }catch(err){
