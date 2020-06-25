@@ -9,3 +9,5 @@ public/api_data.json
 public/api_project.json
 public/vendor/*
 public/utils/
+public/locales
+public/fonts
