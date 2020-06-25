@@ -6,7 +6,7 @@
     "scripts": {
         "start": "babel-node app.js",
         "dev": "nodemon --exec babel-node app.js",
-        "doc": "apidoc -e \"(node_modules|public)\" -o public/v1/apidoc",
+        "doc": "apidoc -e \"(node_modules|public)\" -o public",
         "swagger": "apidoc-swagger -i controllers/ -o ./"
     },
     "keywords": [
