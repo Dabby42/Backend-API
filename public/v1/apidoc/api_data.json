@@ -178,6 +178,46 @@
     "groupTitle": "Auth"
   },
   {
+    "type": "get",
+    "url": "/v1/bookmark",
+    "title": "Get Users' Bookmarks",
+    "name": "Get_Bookmark",
+    "group": "Bookmark",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/BookmarkController.js",
+    "groupTitle": "Bookmark"
+  },
+  {
+    "type": "delete",
+    "url": "/v1/bookmark/:id",
+    "title": "Remove Bookmark",
+    "name": "Remove_Bookmark",
+    "group": "Bookmark",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/BookmarkController.js",
+    "groupTitle": "Bookmark"
+  },
+  {
+    "type": "patch",
+    "url": "/v1/bookmark/restore/:id",
+    "title": "Restore Bookmark",
+    "name": "Restore_Bookmark",
+    "group": "Bookmark",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/BookmarkController.js",
+    "groupTitle": "Bookmark"
+  },
+  {
+    "type": "get",
+    "url": "/v1/bookmark/:id",
+    "title": "Create Bookmark",
+    "name": "Create_Bookmark",
+    "group": "Bookmarks",
+    "version": "0.0.0",
+    "filename": "./controllers/v1/BookmarkController.js",
+    "groupTitle": "Bookmarks"
+  },
+  {
     "type": "post",
     "url": "/v1/interest",
     "title": "Create Interest",
@@ -197,8 +237,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "name",
-            "description": "<p>Name of the Interest</p>"
+            "field": "type",
+            "description": "<p>Type of the Interest</p>"
           }
         ]
       }

@@ -12,7 +12,7 @@ class BookmarkController extends BaseController{
         autoBind(this);
     }
 
-    /**
+  /**
    * @api {get} /v1/bookmark/:id Create Bookmark
    * @apiName Create Bookmark
    * @apiGroup Bookmarks
