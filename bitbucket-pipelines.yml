@@ -13,7 +13,7 @@ pipelines:
        
         script: # Modify the commands below to build your repository.
           - echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa.tmp
-          - base64 -d ~/.ssh/id_rsa.tmp > ~/.ssh/id_rsa
+          - base64 -di ~/.ssh/id_rsa.tmp > ~/.ssh/id_rsa
           - chmod 600 ~/.ssh/id_rsa
           - base64 ~/.ssh/id_rsa
           - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
