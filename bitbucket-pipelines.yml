@@ -14,5 +14,6 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa.tmp
           - base64 -d ~/.ssh/id_rsa.tmp > ~/.ssh/id_rsa
+          - cat ~/.ssh/id_rsa
           - chmod 600 ~/.ssh/id_rsa
-          - ssh -i ~/.ssh/id_rsa ubuntu@$IP_ADDRESS "cd /var/www/scrola && git pull -f origin dev && npm install && npm run doc && pm2 restart parse-apps.config.js && exit"
+          - ssh ubuntu@167.114.2.198 "cd /var/www/scrola && git pull -f origin dev && npm install && npm run doc && pm2 restart parse-apps.config.js && exit"
