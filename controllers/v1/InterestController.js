@@ -27,7 +27,7 @@ class InterestController extends BaseController{
             const service = new imageService('cloudinary');
             // checks if base64 image version exists and uploads to cloudinary
             if(image)image = await service.uploadBase64Image(image);
-            let data = {name};
+            let data = {type:name};
 
             // checks if image uploaded and add it to the data
             if(image) data.image = image.url;
@@ -50,10 +50,10 @@ class InterestController extends BaseController{
      */
 
     async getInterest(req, res) {
-        const { id } = req.body;
+        const { name } = req.body;
         try {
-            let interest = await Interest.findById({_id: id});
-            let data = interest.name;
+            let interest = await Interest.find({type: name, isActive: true});
+            let data = interest.type;
             let userInterest = new UserInterest();
             userInterest.interest = data;
 
@@ -72,9 +72,9 @@ class InterestController extends BaseController{
      * @apiGroup Interest
      */
     async removeInterest(req, res) {
-        const { id } = req.body;
+        const id = req.params.id;
         try{
-            let userInterest = await UserInterest.findOneAndUpdate({_id: id}, {interest: null});
+            let userInterest = await UserInterest.findOneAndUpdate({_id: id}, {isActive: false});
             return super.actionSuccess(res, 'Interest Deleted');
 
         }catch(err){
@@ -82,6 +82,23 @@ class InterestController extends BaseController{
             return super.actionFailure(res, `Couldn't delete interest`);
         }
     }
+
+    /**
+   * @api {patch} /v1/interest/restore/:id Restore Interest
+   * @apiName Restore Interest
+   * @apiGroup Interest
+   */
+  async restoreInterest(req, res){
+    const id = req.params.id;
+    try{
+        let article = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
+        return super.actionSuccess(res, 'Interest Restored');
+
+    }catch(err){
+        console.log(err);
+        return super.actionFailure(res, `Couldn't restore interest`);
+    }
+  }
 
 }
 
