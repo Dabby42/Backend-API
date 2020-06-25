@@ -18,16 +18,16 @@ class InterestController extends BaseController{
    * @apiName Create Interest
    * @apiGroup Interest
    * @apiParam {String} image Interest Image
-   * @apiParam {String} name Name of the Interest
+   * @apiParam {String} type Type of the Interest
    */
     async createInterest(req, res) {
-        let {image, name} = req.body;
+        let {image, type} = req.body;
 
         try {
             const service = new imageService('cloudinary');
             // checks if base64 image version exists and uploads to cloudinary
             if(image)image = await service.uploadBase64Image(image);
-            let data = {type:name};
+            let data = {type};
 
             // checks if image uploaded and add it to the data
             if(image) data.image = image.url;
@@ -50,7 +50,7 @@ class InterestController extends BaseController{
      */
 
     async getInterest(req, res) {
-        const { name } = req.body;
+        const { type} = req.body;
         try {
             let interest = await Interest.find({type: name, isActive: true});
             let data = interest.type;
@@ -58,7 +58,7 @@ class InterestController extends BaseController{
             userInterest.interest = data;
 
             await userInterest.save();
-            return super.actionSuccess(res, 'User Interest Created'); 
+            return super.actionSuccess(res, 'User Interest Retrieved'); 
         } catch (error) {
             console.log(error);
             return super.actionFailure(res, `Couldn't get interest`);
@@ -72,7 +72,7 @@ class InterestController extends BaseController{
      * @apiGroup Interest
      */
     async removeInterest(req, res) {
-        const id = req.params.id;
+        const { id } = req.body;
         try{
             let userInterest = await UserInterest.findOneAndUpdate({_id: id}, {isActive: false});
             return super.actionSuccess(res, 'Interest Deleted');
@@ -89,9 +89,9 @@ class InterestController extends BaseController{
    * @apiGroup Interest
    */
   async restoreInterest(req, res){
-    const id = req.params.id;
+    const { id } = req.body;
     try{
-        let article = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
+        let interest = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
         return super.actionSuccess(res, 'Interest Restored');
 
     }catch(err){
