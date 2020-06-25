@@ -91,7 +91,7 @@ class InterestController extends BaseController{
   async restoreInterest(req, res){
     const id = req.params.id;
     try{
-        let article = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
+        let interest = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
         return super.actionSuccess(res, 'Interest Restored');
 
     }catch(err){
