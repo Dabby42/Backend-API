@@ -12,9 +12,9 @@ pipelines:
           - node
        
         script: # Modify the commands below to build your repository.
-          - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-          - eval $(ssh-agent -s)
-          - ssh-add <(echo "$SSH_PRIVATE_KEY")
-          - mkdir -p ~/.ssh
+          - echo $SSH_PRIVATE_KEY &gt; ~/.ssh/id_rsa.tmp
+          - base64 -d ~/.ssh/id_rsa.tmp &gt; ~/.ssh/id_rsa
+          - chmod 600 ~/.ssh/id_rsa
+          - base64 ~/.ssh/id_rsa
           - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
           - ssh root@$IP_ADDRESS "mkdir -p /var/www/scrola && cd /var/www/scrola && git pull -f origin dev && npm install && npm run doc && pm2 restart parse-apps.config.js && exit"
