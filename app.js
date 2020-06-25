@@ -60,6 +60,9 @@ app.use('/v1/article', require('./routes/v1/ArticleRoute'));
 // Interest Route
 app.use('/v1/interest', require('./routes/v1/InterestRoute'));
 
+// Subscription Route
+app.use('/v1/subscription', require('./routes/v1/SubscriptionRoute'));
+
 //default landing:
 app.all('*', (req, res) => {
   res.status(404).send({
