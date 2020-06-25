@@ -14,7 +14,7 @@ let UserSchema = mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
-  userSubscription: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
+  userSubscription: { type: mongoose.Schema.Types.ObjectId, ref: "UserSubscription" },
 });
 
 UserSchema.pre('save', function(next) {
