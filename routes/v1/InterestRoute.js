@@ -8,7 +8,7 @@ const {validateInterest, validateHasId} = new InterestValdiator();
 
 routes.post("/", validateInterest, createInterest);
 routes.get("/:id", validateHasId, getInterest);
-routes.get("/restore/:id", validateHasId, restoreInterest);
+routes.patch("/restore/:id", validateHasId, restoreInterest);
 routes.delete("/:id", validateHasId, removeInterest);
 
 module.exports = routes;

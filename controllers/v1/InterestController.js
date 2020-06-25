@@ -72,7 +72,7 @@ class InterestController extends BaseController{
      * @apiGroup Interest
      */
     async removeInterest(req, res) {
-        const { id } = req.body;
+        const id = req.params.id;
         try{
             let userInterest = await UserInterest.findOneAndUpdate({_id: id}, {isActive: false});
             return super.actionSuccess(res, 'Interest Deleted');
@@ -89,7 +89,7 @@ class InterestController extends BaseController{
    * @apiGroup Interest
    */
   async restoreInterest(req, res){
-    const { id } = req.body;
+    const id = req.params.id;
     try{
         let article = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
         return super.actionSuccess(res, 'Interest Restored');
