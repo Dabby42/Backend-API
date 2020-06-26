@@ -85,6 +85,23 @@ class AuthController extends BaseController{
     }
   }
 
+   /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   * @param {Object} next 
+   * @api {post} v1/auth/o/token/refresh Refresh user token
+   * @apiName Refresh User Token
+   * @apiGroup Auth
+   * @apiParam {String} email user's email
+   * @apiParam {String} id user's id
+   * @apiParam {String} refreshToken User's refresh token
+   */
+  async refreshToken(req, res, next){
+
+
+  }
+
   /**
    * 
    * @param {Object} req 
