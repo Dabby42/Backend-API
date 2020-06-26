@@ -25,7 +25,7 @@ class AuthValidator extends Helpers{
     const errors = req.validationErrors();
 
     if (errors) {
-      return super.validationFailed(res, extractErrors(errors));
+      return super.validationFailed(res, super.extractErrors(errors));
     }
     return next();
   }
@@ -52,7 +52,7 @@ class AuthValidator extends Helpers{
     const errors = req.validationErrors();
 
     if (errors) {
-      return super.validationFailed(res, extractErrors(errors));
+      return super.validationFailed(res, super.extractErrors(errors));
     }
     return next();
   }
