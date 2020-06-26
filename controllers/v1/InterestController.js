@@ -52,7 +52,7 @@ class InterestController extends BaseController{
     async getInterest(req, res) {
         const { type} = req.body;
         try {
-            let interest = await Interest.find({type: name, isActive: true});
+            let interest = await Interest.find({type: type, isActive: true});
             let data = interest.type;
             let userInterest = new UserInterest();
             userInterest.interest = data;
@@ -63,7 +63,7 @@ class InterestController extends BaseController{
             console.log(error);
             return super.actionFailure(res, `Couldn't get interest`);
         }
-        
+
     }
 
     /**

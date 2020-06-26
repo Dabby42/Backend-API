@@ -159,22 +159,14 @@ class AuthController extends BaseController{
         user.firstName = profile.username;
         user.socialId = profile.id;
 
-        user.save()
-            .then(result => {
-              console.log(result);
-              res.status(201).json({
-                  message: "User created successfully",
-                  Profile: {
-                      firstName: result.firstName,
-                      socialId: result.socialId,
-                  }
-              })
-            })
+        await user.save()
+        return super.actionSuccess(res, user, 'User created successfully');
       } else {
         return null
       }
     } catch (error) {
-      return null
+      console.log(err);
+      return super.actionFailure(res, `Couldn't create user`);
     }
 
   }
