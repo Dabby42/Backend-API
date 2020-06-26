@@ -63,6 +63,12 @@ const secrets = {
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY, 
   cloudinaryApiSecret: process.env.CLOUDINARY_SECRET,
 
+  apnKeyId: process.env.APN_KEY_ID,
+  apnTeamId: process.env.APN_TEAM_ID,
+  apnKeyP8: process.env.KEY_P8_FILE,
+
+  gcmApiKey: process.env.GCM_API_KEY
+
 };
 
 module.exports = secrets;

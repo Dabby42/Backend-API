@@ -97,7 +97,7 @@ class AuthController extends BaseController{
     
     try {
       let longLivedToken = await axios.get(`${baseURL}/oauth/access_token?grant_type=fb_exchange_token&client_id=${secrets.facebookClientId}&client_secret=${secrets.facebookAppSecret}&fb_exchange_token=${accessToken}`)
-      
+      let provider = "facebook"
       if (longLivedToken) {
 
         let profile = axios.get(`${baseURL}/me?fields=id,email,last_name,first_name&access_token=${longLivedToken}`);
@@ -105,26 +105,18 @@ class AuthController extends BaseController{
         user.firstName = profile.first_name;
         user.lastName = profile.last_name;
         user.email = profile.email;
+        user.provider = provider;
         user.socialId = profile.id;
 
-        user.save()
-            .then(user => {
-              console.log(user);
-              res.status(201).json({
-                  message: "User created successfully",
-                  Profile: {
-                      firstName: user.firstName,
-                      lastName: user.lastName,
-                      email: user.email,
-                      socialId: user.socialId,
-                  }
-              })
-            })
+        await user.save()
+        return super.actionSuccess(res, 'User created successfully');
+            
       } else {
         return null
       }
     } catch (err) {
-      return null
+      console.log(err);
+      return super.actionFailure(res, `Couldn't create user`);
     }
   }
 
@@ -146,27 +138,20 @@ class AuthController extends BaseController{
     try {
 
       let profile = axios.get(`${baseURL}?usernames=${screenName}&user.fields=name,screen_name,email,id_str`,{ headers});
+      let provider = "twitter"
       const user = new User();
       user.firstName = profile.data[0].name;
       user.lastName = profile.data[0].screen_name;
       user.email = profile.data[0].email;
+      user.provider = provider;
       user.socialId = profile.data[0].id_str;
 
-      user.save()
-          .then(result => {
-            console.log(result);
-            res.status(201).json({
-                message: "User created successfully",
-                Profile: {
-                    firstName: result.firstName,
-                    lastName: result.lastName,
-                    email: result.email,
-                    socialId: result.socialId,
-                }
-            })
-          })
+      await user.save()
+      return super.actionSuccess(res, user, 'User created successfully');
+         
     } catch (error) {
-      return null
+        console.log(err);
+        return super.actionFailure(res, `Couldn't create user`);
     }
 
   }
@@ -191,22 +176,14 @@ class AuthController extends BaseController{
         user.firstName = profile.username;
         user.socialId = profile.id;
 
-        user.save()
-            .then(result => {
-              console.log(result);
-              res.status(201).json({
-                  message: "User created successfully",
-                  Profile: {
-                      firstName: result.firstName,
-                      socialId: result.socialId,
-                  }
-              })
-            })
+        await user.save()
+        return super.actionSuccess(res, user, 'User created successfully');
       } else {
         return null
       }
     } catch (error) {
-      return null
+      console.log(err);
+      return super.actionFailure(res, `Couldn't create user`);
     }
 
   }

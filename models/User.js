@@ -10,7 +10,6 @@ let UserSchema = mongoose.Schema({
   avatar: {type: String},
   provider: {type: String, required: true},
   socialId: {type: String},
-  provider: {type: String, required: true},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
