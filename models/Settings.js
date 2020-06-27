@@ -16,6 +16,6 @@ let SettingsSchema = mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
 });
 
-let Settings = mongoose.model("Interest", SettingsSchema);
+let Settings = mongoose.model("Settings", SettingsSchema);
 
 module.exports = Settings;
