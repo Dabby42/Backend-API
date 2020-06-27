@@ -9,4 +9,5 @@ public/api_data.json
 public/api_project.json
 public/vendor/*
 public/utils/
-parse-apps.config.js
+public/locales
+public/fonts

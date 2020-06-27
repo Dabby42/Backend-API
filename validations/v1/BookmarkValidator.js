@@ -29,6 +29,26 @@ class BookmarkValidator extends Helpers{
     return next();
   }
 
+     /**
+   * validates Bookmark data
+   * @param {object} req
+   * @param {object} res
+   * @param {callback} next
+   */
+  validateBookmark(req, res, next) {
+   
+    req.check('useremail', 'user email field is required').notEmpty().trim();
+
+    req.check('bookmarktitle', 'bookmark title field is required').notEmpty().trim();
+
+    const errors = req.validationErrors();
+
+    if (errors) {
+        return super.validationFailed(res, super.extractErrors(errors));
+    }
+    return next();
+  }
+
 
 
 

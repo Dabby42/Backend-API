@@ -5,7 +5,7 @@ const hasRolesAndClaims = require('gatemanjs').hasRolesAndClaims(mongoose);
 let UserSchema = mongoose.Schema({
   firstName: {type: String},
   lastName: {type: String},
-  email: {type: String,unique: true, index: true},
+  email: {type: String, unique: true, index: true},
   password: {type: String},
   avatar: {type: String},
   provider: {type: String, required: true},
@@ -13,7 +13,7 @@ let UserSchema = mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
-  userSubscription: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
+  userSubscription: { type: mongoose.Schema.Types.ObjectId, ref: "UserSubscription" },
 });
 
 UserSchema.pre('save', function(next) {

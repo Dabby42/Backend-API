@@ -1,6 +1,7 @@
 import autoBind from 'auto-bind';
 import BaseController from './BaseController';
 import Bookmark from './../../models/Bookmark';
+import User from './../../models/User';
 import Article from './../../models/Article';
 import dotenv from 'dotenv';
 
@@ -13,24 +14,29 @@ class BookmarkController extends BaseController{
     }
 
   /**
-   * @api {get} /v1/bookmark/:id Create Bookmark
+   * @api {post} /v1/bookmark/ Create Bookmark
    * @apiName Create Bookmark
    * @apiGroup Bookmarks
    */
     async createBookmark(req, res) {
-        const { id } = req.body;
+        const { useremail, bookmarktitle } = req.body;
 
         try {
-
-            let article = await Article.findById({_id: id});
-            if (!article) {
-                return super.notfound(res, `No article found`);
+            let user = await User.findOne({email:useremail});
+            if (user) {
+                console.log(user);
+                
+                let article = await Article.findOne({title:bookmarktitle});
+                if (!article) {
+                    return super.notfound(res, `No article found`);
+                }
+                let articleId = article._id;
+                let userId = user._id;
+                let bookmark = new Bookmark({article: articleId,user: userId});
+                await bookmark.save()
+                return super.success(res, Bookmark, 'Created Bookmark Successfully');
             }
-            let bookmark = new Bookmark();
-            bookmark.article = article._id
-            await bookmark.save()
-
-            return super.success(res, Bookmark, 'Created Bookmark Successfully');
+            return super.notfound(res, `user not found`);
             
         } catch (error) {
             return super.actionFailure(res, `Couldn't create Bookmark`);
@@ -39,15 +45,20 @@ class BookmarkController extends BaseController{
     }
 
     /**
-     * @api {get} /v1/bookmark Get Users' Bookmarks
+     * @api {get} /v1/bookmark/:id Get Users' Bookmarks
      * @apiName Get Bookmark
      * @apiGroup Bookmark
      */
 
     async getBookmark(req, res) {
+        const {id} = req.body
         try {
-            let bookmark = await Bookmark.find({isActive: true});
-            return super.success(res, bookmark, 'Bookmark Retrieved');
+            let user = await User.findOne({_id:id});
+            if (user) {
+                let bookmark = await Bookmark.find({user:id, isActive:true });
+                return super.success(res, bookmark, 'Bookmark Retrieved');
+            }
+            return super.notfound(res, `user not found`);
              
         } catch (error) {
             console.log(error);
@@ -64,9 +75,16 @@ class BookmarkController extends BaseController{
     async removeBookmark(req, res) {
         const { id } = req.body;
         try{
-            let bookmark = await Bookmark.findOneAndUpdate({_id: id}, {isActive: false});
-            return super.actionSuccess(res, 'Bookmark Deleted');
-
+            let user = await User.findOne({_id:id});
+            if (user) {
+                let bookmark = await Bookmark.findOne({user: id});
+                bookmark.isActive = false;
+                bookmark.save();
+                console.log(bookmark);
+                
+                return super.actionSuccess(res, 'Bookmark Deleted');
+            }
+            return super.notfound(res, `user not found`);
         }catch(err){
             console.log(err);
             return super.actionFailure(res, `Couldn't delete bookmark`);
@@ -81,9 +99,14 @@ class BookmarkController extends BaseController{
   async restoreBookmark(req, res){
     const { id } = req.body;
     try{
-        let bookmark = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
-        return super.actionSuccess(res, 'Bookmark Restored');
-
+        let user = await User.findOne({_id:id});
+        if (user) {
+            let bookmark = await Bookmark.findOne({user: id});
+            bookmark.isActive = true;
+            bookmark.save();
+            return super.actionSuccess(res, 'Bookmark Restored');
+        }
+        return super.notfound(res, `user not found`);   
     }catch(err){
         console.log(err);
         return super.actionFailure(res, `Couldn't restore bookmark`);

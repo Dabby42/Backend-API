@@ -62,7 +62,7 @@ class AuthController extends BaseController{
       let user = await User.findOne({email, provider});
 
       if(!user){
-        user = new User({email, firstName, lastName, socialId});
+        user = new User({email, firstName, lastName, provider, socialId});
         await user.save()
       } 
       // also add the claims here when the role management is setup
@@ -75,7 +75,7 @@ class AuthController extends BaseController{
       let refreshToken = jwt.sign({ email, id: user._id }, secrets.jwtRefreshSecret,{expiresIn: secrets.jwtRefreshTtl });
       
       user.refreshToken = refreshToken;
-      req.body.userId = _id;
+      req.body.userId = user._id;
       user = await user.save();
       return super.success(res,{ token, user, refreshToken, roles, claims }, 'Authentication Successful');
 
@@ -83,6 +83,23 @@ class AuthController extends BaseController{
         console.log(err);
         return super.unauthorized(res, 'Invalid Credentials, could not complete authentication');
     }
+  }
+
+   /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   * @param {Object} next 
+   * @api {post} v1/auth/o/token/refresh Refresh user token
+   * @apiName Refresh User Token
+   * @apiGroup Auth
+   * @apiParam {String} email user's email
+   * @apiParam {String} id user's id
+   * @apiParam {String} refreshToken User's refresh token
+   */
+  async refreshToken(req, res, next){
+
+
   }
 
   /**
@@ -93,30 +110,20 @@ class AuthController extends BaseController{
   async authenticateFacebook(req, res){
     const {accessToken} = req.body;
     // write facebook implementation for log in and implement long lived token
-    let baseURL = secrets.facebookBaseUrl;
     
     try {
-      let longLivedToken = await axios.get(`${baseURL}/oauth/access_token?grant_type=fb_exchange_token&client_id=${secrets.facebookClientId}&client_secret=${secrets.facebookAppSecret}&fb_exchange_token=${accessToken}`)
-      let provider = "facebook"
+      let longLivedToken = await axios.get(`${secrets.facebookBaseUrl}/oauth/access_token?grant_type=fb_exchange_token&client_id=${secrets.facebookClientId}&client_secret=${secrets.facebookAppSecret}&fb_exchange_token=${accessToken}`)
+      
       if (longLivedToken) {
 
-        let profile = axios.get(`${baseURL}/me?fields=id,email,last_name,first_name&access_token=${longLivedToken}`);
-        const user = new User();
-        user.firstName = profile.first_name;
-        user.lastName = profile.last_name;
-        user.email = profile.email;
-        user.provider = provider;
-        user.socialId = profile.id;
-
-        await user.save()
-        return super.actionSuccess(res, 'User created successfully');
-            
+        let profile = await axios.get(`${secrets.facebookBaseUrl}/me?fields=id,email,last_name,first_name&access_token=${longLivedToken.data.access_token}`);
+        const {first_name, last_name, email, id} = profile.data;
+        return {socialId: id, email, firstName: first_name, lastName: last_name }
       } else {
-        return null
+        throw new Error('Couldnt authenticate user')
       }
     } catch (err) {
-      console.log(err);
-      return super.actionFailure(res, `Couldn't create user`);
+      throw new Error('Couldnt authenticate user')
     }
   }
 
@@ -129,29 +136,22 @@ class AuthController extends BaseController{
     //access tokens are not explicitly expired
     const {accessToken, screenName} = req.body;
     // write twitter implementation for log in and implement long lived token
-
-    let baseURL = secrets.twitterBaseUrl;
-    let headers = {
-      'Authorization': `Bearer ${accessToken}`  
+    let config = {
+      headers: {'Authorization': `Bearer ${accessToken}`}  
     }
     
     try {
 
-      let profile = axios.get(`${baseURL}?usernames=${screenName}&user.fields=name,screen_name,email,id_str`,{ headers});
-      let provider = "twitter"
-      const user = new User();
-      user.firstName = profile.data[0].name;
-      user.lastName = profile.data[0].screen_name;
-      user.email = profile.data[0].email;
-      user.provider = provider;
-      user.socialId = profile.data[0].id_str;
+      let profile = await axios.get(`${secrets.twitterBaseUrl}usernames=${screenName}&user.fields=name,screen_name,email,id_str`,{ config});
+      // user.firstName = profile.data[0].name;
+      // user.lastName = profile.data[0].screen_name;
+      // user.email = profile.data[0].email;
+      // user.socialId = profile.data[0].id_str;
+      console.log(profile.data)
 
-      await user.save()
-      return super.actionSuccess(res, user, 'User created successfully');
-         
     } catch (error) {
-        console.log(err);
-        return super.actionFailure(res, `Couldn't create user`);
+      console.log(error.response)
+      throw new Error('Failed to authenticate User');
     }
 
   }
