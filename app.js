@@ -71,8 +71,12 @@ app.use('/v1/settings', require('./routes/v1/SettingsRoute'));
 
 // Notification Route
 app.use('/v1/notification', require('./routes/v1/NotificationRoute'));
+
 // Transaction
 app.use('/v1/transaction', require('./routes/v1/TransactionRoute'));
+
+// Socials
+app.use('/v1/social', require('./routes/v1/SocialRoute'));
 
 //default landing:
 app.all('*', (req, res) => {

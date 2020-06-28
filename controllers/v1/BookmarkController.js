@@ -17,26 +17,26 @@ class BookmarkController extends BaseController{
    * @api {post} /v1/bookmark/ Create Bookmark
    * @apiName Create Bookmark
    * @apiGroup Bookmarks
+   * @apiParam {String} articleId id of Article
    */
     async createBookmark(req, res) {
-        const { useremail, bookmarktitle } = req.body;
+        const { userId, articleId } = req.body;
 
         try {
-            let user = await User.findOne({email:useremail});
-            if (user) {
-                console.log(user);
-                
-                let article = await Article.findOne({title:bookmarktitle});
-                if (!article) {
-                    return super.notfound(res, `No article found`);
-                }
-                let articleId = article._id;
-                let userId = user._id;
-                let bookmark = new Bookmark({article: articleId,user: userId});
-                await bookmark.save()
+            
+            let article = await Article.findOne({_id: articleId});
+
+            if (!article) {
+                return super.notfound(res, `No article found`);
+            }
+
+            let bookmark = await Bookmark.findOne({user: userId, article: articleId});
+            if(bookmark){
                 return super.success(res, Bookmark, 'Created Bookmark Successfully');
             }
-            return super.notfound(res, `user not found`);
+            bookmark = new Bookmark({article: articleId, user: userId});
+            await bookmark.save()
+            return super.success(res, Bookmark, 'Created Bookmark Successfully');
             
         } catch (error) {
             return super.actionFailure(res, `Couldn't create Bookmark`);
@@ -45,24 +45,20 @@ class BookmarkController extends BaseController{
     }
 
     /**
-     * @api {get} /v1/bookmark/:id Get Users' Bookmarks
+     * @api {get} /v1/bookmark Get Users' Bookmarks
      * @apiName Get Bookmark
      * @apiGroup Bookmark
      */
-
     async getBookmark(req, res) {
-        const {id} = req.body
+        const {userId} = req.body
         try {
-            let user = await User.findOne({_id:id});
-            if (user) {
-                let bookmark = await Bookmark.find({user:id, isActive:true });
-                return super.success(res, bookmark, 'Bookmark Retrieved');
-            }
-            return super.notfound(res, `user not found`);
+            let bookmarks = await Bookmark.find({user: userId, isActive:true }).populate('article').exec();
+                
+            return super.success(res, bookmarks, 'Bookmark Retrieved');
              
         } catch (error) {
-            console.log(error);
-            return super.actionFailure(res, `Couldn't get bookmark`);
+
+            return super.actionFailure(res, `Couldn't get bookmarks`);
         }
         
     }

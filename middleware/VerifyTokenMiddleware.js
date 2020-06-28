@@ -35,7 +35,7 @@ class VerifyTokenMiddleware extends Middleware{
             // if everything good, save to request for use in other routes
             req.body.userId = decoded.id;
             req.body.email = decoded.email;
-            console.log(decoded);
+            // console.log(decoded);
             return next();
         });
     }

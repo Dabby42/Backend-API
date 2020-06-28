@@ -37,9 +37,7 @@ class BookmarkValidator extends Helpers{
    */
   validateBookmark(req, res, next) {
    
-    req.check('useremail', 'user email field is required').notEmpty().trim();
-
-    req.check('bookmarktitle', 'bookmark title field is required').notEmpty().trim();
+    req.check('articleId', 'Article id field is required').notEmpty().trim();
 
     const errors = req.validationErrors();
 
