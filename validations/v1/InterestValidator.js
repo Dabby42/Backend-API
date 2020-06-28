@@ -17,9 +17,29 @@ class InterestValidator extends Helpers{
    * @param {callback} next
    */
   validateInterest(req, res, next) {
-    const {type, image} = req.body;
    
-    req.check('type', 'type field is required').notEmpty().trim();
+    req.check('name', 'name field is required').notEmpty().trim();
+
+    req.check('id', 'id field is required').notEmpty().trim();
+
+    const errors = req.validationErrors();
+
+    if (errors) {
+        return super.validationFailed(res, super.extractErrors(errors));
+    }
+    return next();
+  }
+
+     /**
+   * validates interest data
+   * @param {object} req
+   * @param {object} res
+   * @param {callback} next
+   */
+  validateCreateInterest(req, res, next) {
+    const {image} = req.body;
+   
+    req.check('name', 'name field is required').notEmpty().trim();
 
     req.check('image', 'image must be a base64 string')
         .custom(() => {
@@ -43,6 +63,8 @@ class InterestValidator extends Helpers{
     }
     return next();
   }
+
+
 
 
    /**

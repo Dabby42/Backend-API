@@ -2,6 +2,7 @@ import autoBind from 'auto-bind';
 import BaseController from './BaseController';
 import Interest from './../../models/Interest';
 import UserInterest from './../../models/UserInterest';
+import User from './../../models/User';
 import dotenv from 'dotenv';
 
 import imageService from './../../services/ImageService';
@@ -18,16 +19,16 @@ class InterestController extends BaseController{
    * @apiName Create Interest
    * @apiGroup Interest
    * @apiParam {String} image Interest Image
-   * @apiParam {String} type Type of the Interest
+   * @apiParam {String} name Type of the Interest
    */
     async createInterest(req, res) {
-        let {image, type} = req.body;
+        let {image, name} = req.body;
 
         try {
             const service = new imageService('cloudinary');
             // checks if base64 image version exists and uploads to cloudinary
             if(image)image = await service.uploadBase64Image(image);
-            let data = {type};
+            let data = {name};
 
             // checks if image uploaded and add it to the data
             if(image) data.image = image.url;
@@ -44,39 +45,46 @@ class InterestController extends BaseController{
     }
 
     /**
-     * @api {get} /v1/interest/:id Get User's Interest
+     * @api {post} /v1/interest/select Get User's Interest
      * @apiName Get User's Interest
      * @apiGroup Interest
      */
 
-    async getInterest(req, res) {
-        const { type} = req.body;
+    async selectInterest(req, res) {
+        const { name, id} = req.body;
         try {
-            let interest = await Interest.find({type: type, isActive: true});
-            let data = interest.type;
-            let userInterest = new UserInterest();
-            userInterest.interest = data;
-
-            await userInterest.save();
-            return super.actionSuccess(res, 'User Interest Retrieved'); 
+            let user = await User.findOne({_id:id});
+            if (user) {
+                let interest = await Interest.findOne({name:name, isActive: true});
+                let data = interest.name;
+                console.log(data);
+                let userInterest = new UserInterest();
+                userInterest.interest = data;
+                userInterest.user = user._id;
+                await userInterest.save();
+                return super.actionSuccess(res, 'Interest selected successfully'); 
+            }
+            return super.notfound(res, `user not found`);
+            
         } catch (error) {
             console.log(error);
-            return super.actionFailure(res, `Couldn't get interest`);
+            return super.actionFailure(res, `Couldn't select interest`);
         }
 
     }
 
     /**
-     * @api {delete} /v1/interest/:id Remove Interest
+     * @api {delete} /v1/interest/:id remove Remove Interest
      * @apiName Remove Interest
      * @apiGroup Interest
      */
     async removeInterest(req, res) {
         const { id } = req.body;
         try{
-            let userInterest = await UserInterest.findOneAndUpdate({_id: id}, {isActive: false});
-            return super.actionSuccess(res, 'Interest Deleted');
-
+            let userInterest = await UserInterest.findOne({_id: id});
+            userInterest.isActive = false;
+            await userInterest.save();
+            return super.actionSuccess(res, 'Interest has been deleted');
         }catch(err){
             console.log(err);
             return super.actionFailure(res, `Couldn't delete interest`);
@@ -91,8 +99,11 @@ class InterestController extends BaseController{
   async restoreInterest(req, res){
     const { id } = req.body;
     try{
-        let interest = await Interest.findOneAndUpdate({_id: id}, {isActive: true});
-        return super.actionSuccess(res, 'Interest Restored');
+
+        let userInterest = await UserInterest.findOne({_id: id});
+        userInterest.isActive = true;
+        userInterest.save();
+        return super.actionSuccess(res, 'Interest has been restored');
 
     }catch(err){
         console.log(err);
@@ -100,6 +111,28 @@ class InterestController extends BaseController{
     }
   }
 
+    /**
+   * @api {get} /v1/interest/:id Retrieve users interest
+   * @apiName Retrieve Interest
+   * @apiGroup Interest
+   */
+  async getInterest(req, res){
+    const { id } = req.body;
+    try {
+        let user = await User.findOne({_id:id});
+        if (user) {
+            let userInterest = await UserInterest.find({user: user._id});
+            return super.actionSuccess(res, userInterest,'Interest has been retrieved successfully');
+        }
+        return super.notfound(res, `user not found`);
+    } catch (error) {
+        console.log(err);
+        return super.actionFailure(res, `Couldn't retrieve user interest`);
+    }
+  }
+
 }
+
+
 
 module.exports = InterestController;

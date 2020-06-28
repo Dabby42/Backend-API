@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 let InterestSchema = mongoose.Schema({
     image: {type: String},
-    type: {type: String},
+    name: {type: String},
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
