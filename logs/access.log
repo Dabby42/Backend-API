@@ -15,3 +15,4 @@
 ::1 - - [28/Jun/2020:05:51:47 +0000] "PATCH /v1/interest/restore/5ef82b1b603c0d4f282fdd1f HTTP/1.1" 200 77 "-" "PostmanRuntime/7.26.1"
 ::1 - - [28/Jun/2020:05:52:48 +0000] "PATCH /v1/interest/restore/5ef82b1b603c0d4f282fdd1f HTTP/1.1" 200 77 "-" "PostmanRuntime/7.26.1"
 ::1 - - [28/Jun/2020:05:54:02 +0000] "GET /v1/interest/5ef73958165c8c36b060268a HTTP/1.1" 200 411 "-" "PostmanRuntime/7.26.1"
+::1 - - [28/Jun/2020:06:00:38 +0000] "POST /v1/notification HTTP/1.1" 200 289 "-" "PostmanRuntime/7.26.1"
