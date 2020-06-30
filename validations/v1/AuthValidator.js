@@ -39,11 +39,14 @@ class AuthValidator extends Helpers{
   validateAuthLogin(req, res, next) {
     const {provider} = req.body;
     
-    req.check('accessToken', 'Access Token is required')
-      .notEmpty().trim();
+    // req.check('accessToken', 'Access Token is required')
+    //   .notEmpty().trim();
 
     req.check('provider', 'Provider is required')
       .notEmpty().trim();
+
+    req.check('accessToken', 'Access Token is required')
+    .notEmpty().trim();  
 
     req.check('provider', `provider must be either of the following ${PROVIDER.join(', ')}`)
       .custom(() => {

@@ -3,11 +3,15 @@ import jwt from "jsonwebtoken";
 import autoBind from 'auto-bind';
 import BaseController from './BaseController';
 import User from './../../models/User';
+import Social from './../../models/Social';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import twitter from 'twitter';
 import secrets from './../../config/secrets';
 import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
 dotenv.config();
+
+
 
 class AuthController extends BaseController{
 
@@ -57,7 +61,7 @@ class AuthController extends BaseController{
 
       //check if result returns required data
       if(!result) return super.unauthorized(res, 'Authentication could not be completed');
-      const {firstName, email, lastName, socialId} = result;
+      const {firstName, email, lastName, longLivedAccessToken, socialId} = result;
       
       let user = await User.findOne({email, provider});
 
@@ -76,7 +80,20 @@ class AuthController extends BaseController{
       
       user.refreshToken = refreshToken;
       req.body.userId = user._id;
+
       user = await user.save();
+      let social = await Social.findOne({user: user._id, provider, socialId});
+      
+      if(!social){
+        social = new Social({user, firstName, lastName, longLivedAccessToken, socialId, provider })
+        social.save();
+      }else{
+        social.longLivedAccessToken = longLivedAccessToken;
+        social.firstName = firstName;
+        social.lastName = lastName;
+        social.save();
+      }
+
       return super.success(res,{ token, user, refreshToken, roles, claims }, 'Authentication Successful');
 
     }catch(err){
@@ -118,7 +135,8 @@ class AuthController extends BaseController{
 
         let profile = await axios.get(`${secrets.facebookBaseUrl}/me?fields=id,email,last_name,first_name&access_token=${longLivedToken.data.access_token}`);
         const {first_name, last_name, email, id} = profile.data;
-        return {socialId: id, email, firstName: first_name, lastName: last_name }
+
+        return {socialId: id, email, longLivedAccessToken: longLivedToken.data.access_token,  firstName: first_name, lastName: last_name }
       } else {
         throw new Error('Couldnt authenticate user')
       }
@@ -134,25 +152,19 @@ class AuthController extends BaseController{
    */
   async authenticateTwitter(req, res){
     //access tokens are not explicitly expired
-    const {accessToken, screenName} = req.body;
+    const {accessToken} = req.body;
     // write twitter implementation for log in and implement long lived token
-    let config = {
-      headers: {'Authorization': `Bearer ${accessToken}`}  
-    }
-    
     try {
+      let profile = await axios.get(`${secrets.twitterBaseUrl}/1.1/account/verify_credentials.json`);
+      console.log(profile);
+      
+      const {name, screen_name, email, id_str} = profile;
 
-      let profile = await axios.get(`${secrets.twitterBaseUrl}usernames=${screenName}&user.fields=name,screen_name,email,id_str`,{ config});
-      // user.firstName = profile.data[0].name;
-      // user.lastName = profile.data[0].screen_name;
-      // user.email = profile.data[0].email;
-      // user.socialId = profile.data[0].id_str;
-      console.log(profile.data)
-
-    } catch (error) {
-      console.log(error.response)
-      throw new Error('Failed to authenticate User');
+      return {socialId: id_str, email, longLivedAccessToken: accessToken,  firstName: name, lastName: screen_name }
+    } catch (err) {
+      throw new Error('Couldnt authenticate user');
     }
+
 
   }
 
@@ -162,33 +174,8 @@ class AuthController extends BaseController{
    * @param {Object} res 
    */
   async authenticateInstagram(req, res){
-    const {accessToken} = req.body;
-    // write instagram implementation for log in and implement long lived token
-    let baseURL = secrets.instagramBaseUrl;
     
-    try {
-      let longLivedToken = await axios.get(`${baseURL}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
-      
-      if (longLivedToken) {
-
-        let profile = axios.get(`${baseURL}/me?fields=id,username&access_token=${longLivedToken}`);
-        const user = new User();
-        user.firstName = profile.username;
-        user.socialId = profile.id;
-
-        await user.save()
-        return super.actionSuccess(res, user, 'User created successfully');
-      } else {
-        return null
-      }
-    } catch (error) {
-      console.log(err);
-      return super.actionFailure(res, `Couldn't create user`);
-    }
-
-  }
-
-
+  }  
 
 }
 

@@ -71,8 +71,12 @@ app.use('/v1/settings', require('./routes/v1/SettingsRoute'));
 
 // Notification Route
 app.use('/v1/notification', require('./routes/v1/NotificationRoute'));
+
 // Transaction
 app.use('/v1/transaction', require('./routes/v1/TransactionRoute'));
+
+// Socials
+app.use('/v1/social', require('./routes/v1/SocialRoute'));
 
 //default landing:
 app.all('*', (req, res) => {
@@ -87,7 +91,7 @@ dotenv.config();
 
 //=========================================================
 //Running the server on Port 3000 default
-let PORT = process.env.PORT || 4000;
+let PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {console.log(`App is running on Port ${PORT}`)});
 
 module.exports = app; 
