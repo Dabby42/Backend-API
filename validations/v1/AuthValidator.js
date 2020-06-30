@@ -57,5 +57,23 @@ class AuthValidator extends Helpers{
     return next();
   }
 
+   /**
+   * validates Refresh Token
+   * @param {object} req
+   * @param {object} res
+   * @param {callback} next
+   */
+  validateRefreshToken(req, res, next) {
+    req.check('email', 'Email field is required').notEmpty().trim().isEmail().withMessage('Invalid email fromat');
+    req.check('refreshToken', 'refreshToken is required').notEmpty().trim();
+    req.check('id', 'user id is required').notEmpty().trim();
+    const errors = req.validationErrors();
+
+    if (errors) {
+        return super.validationFailed(res, super.extractErrors(errors));
+    }
+    return next();
+  }
+
   }
   module.exports = AuthValidator;

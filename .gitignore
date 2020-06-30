@@ -2,6 +2,7 @@ node_modules/
 .env
 /logs
 logs/
+logs/access.log
 logs/*
 public/api_project.js
 public/api_data.js

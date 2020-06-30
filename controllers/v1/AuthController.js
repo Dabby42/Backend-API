@@ -112,7 +112,29 @@ class AuthController extends BaseController{
    * @apiParam {String} refreshToken User's refresh token
    */
   async refreshToken(req, res, next){
+    const {id, email, refreshToken} = req.body;
+    try{
+      let user = await User.findOne({_id: id, email, refreshToken});
+      if(user){
 
+        // also add the claims here when the role management is setup
+        let roles = await user.getRolesForUser();
+        let claims = await user.getClaimsForUser();
+        
+
+        let {email, firstName, lastName, provider, socialId} = user;
+
+        let token = jwt.sign({ firstName, email, id: user._id, roles, claims, lastName },secrets.jwtSecret,{expiresIn: secrets.jwtTtl});
+      
+        return super.success(res,{ token, user, refreshToken: user.refreshToken, roles, claims }, 'Token refresh Successful');  
+      }else{
+        return super.notFound(res, "Account does not exist");
+      }
+      
+    }catch(err){
+      console.log(err);
+      return super.unauthorized(res, 'Invalid Credentials');
+    }
 
   }
 
