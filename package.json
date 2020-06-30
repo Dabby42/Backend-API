@@ -44,6 +44,7 @@
         "node-gcm": "^1.0.2",
         "path": "^0.12.7",
         "rotating-file-stream": "^2.1.1",
+        "twitter": "^1.7.1",
         "uuid": "^8.1.0"
     }
 }

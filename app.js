@@ -91,7 +91,7 @@ dotenv.config();
 
 //=========================================================
 //Running the server on Port 3000 default
-let PORT = process.env.PORT || 4000;
+let PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {console.log(`App is running on Port ${PORT}`)});
 
 module.exports = app; 

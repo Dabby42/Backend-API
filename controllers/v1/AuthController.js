@@ -6,9 +6,12 @@ import User from './../../models/User';
 import Social from './../../models/Social';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import twitter from 'twitter';
 import secrets from './../../config/secrets';
 import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
 dotenv.config();
+
+
 
 class AuthController extends BaseController{
 
@@ -17,7 +20,7 @@ class AuthController extends BaseController{
     autoBind(this);
   }
   /**
-   * @api {post} /o/token Authenticate User
+   * @api {post} v1/auth/register Authenticate User
    * @apiName Authenticate User
    * @apiGroup Auth
    * @apiParam {String} email user's email
@@ -25,6 +28,24 @@ class AuthController extends BaseController{
    */
   async register(req, res) {
     
+  }
+
+  /**
+   * @api {post} v1/auth/profile Update User Profile
+   * @apiName Update User Profile
+   * @apiGroup Auth
+   * @apiParam {String} firstName user's firstName
+   * @apiParam {String} lastName user's lastName
+   */
+  async updateProfile(req, res) {
+    const { userId, lastName, firstName } = req.body;
+
+    try{
+      let user = await User.findOneAndUpdate({_id: userId}, {firstName, lastName}, {new: true});
+      return super.success(res, user, 'Profile updated')
+    }catch(err){
+      return super.actionFailure(res, 'Couldnt update profile');
+    }
   }
 
   /**
@@ -171,25 +192,19 @@ class AuthController extends BaseController{
    */
   async authenticateTwitter(req, res){
     //access tokens are not explicitly expired
-    const {accessToken, screenName} = req.body;
+    const {accessToken} = req.body;
     // write twitter implementation for log in and implement long lived token
-    let config = {
-      headers: {'Authorization': `Bearer ${accessToken}`}  
-    }
-    
     try {
+      let profile = await axios.get(`${secrets.twitterBaseUrl}/1.1/account/verify_credentials.json`);
+      console.log(profile);
+      
+      const {name, screen_name, email, id_str} = profile;
 
-      let profile = await axios.get(`${secrets.twitterBaseUrl}usernames=${screenName}&user.fields=name,screen_name,email,id_str`,{ config});
-      // user.firstName = profile.data[0].name;
-      // user.lastName = profile.data[0].screen_name;
-      // user.email = profile.data[0].email;
-      // user.socialId = profile.data[0].id_str;
-      console.log(profile.data)
-
-    } catch (error) {
-      console.log(error.response)
-      throw new Error('Failed to authenticate User');
+      return {socialId: id_str, email, longLivedAccessToken: accessToken,  firstName: name, lastName: screen_name }
+    } catch (err) {
+      throw new Error('Couldnt authenticate user');
     }
+
 
   }
 
@@ -199,33 +214,8 @@ class AuthController extends BaseController{
    * @param {Object} res 
    */
   async authenticateInstagram(req, res){
-    const {accessToken} = req.body;
-    // write instagram implementation for log in and implement long lived token
-    let baseURL = secrets.instagramBaseUrl;
     
-    try {
-      let longLivedToken = await axios.get(`${baseURL}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
-      
-      if (longLivedToken) {
-
-        let profile = axios.get(`${baseURL}/me?fields=id,username&access_token=${longLivedToken}`);
-        const user = new User();
-        user.firstName = profile.username;
-        user.socialId = profile.id;
-
-        await user.save()
-        return super.actionSuccess(res, user, 'User created successfully');
-      } else {
-        return null
-      }
-    } catch (error) {
-      console.log(err);
-      return super.actionFailure(res, `Couldn't create user`);
-    }
-
-  }
-
-
+  }  
 
 }
 

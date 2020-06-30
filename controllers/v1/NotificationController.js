@@ -24,7 +24,7 @@ class NotificationController extends BaseController{
       let notification = new Notification(data);
       await notification.save();
 
-      return super.success(res, notification, 'Notification created Successfully');
+      return super.success(res,'Notification created Successfully');
     } catch (err) {
       console.log(err);
       return super.actionFailure(res, `Couldn't create notification`);
@@ -37,9 +37,9 @@ class NotificationController extends BaseController{
    * @apiGroup Notification
    */
   async getNotification(req, res){
-    const {id} = req.body
+    const {userId} = req.body
     try {
-      let notification = await Notification.findById({_id: id});
+      let notification = await Notification.findById({_id: userId});
       return super.success(res, notification, 'Notification Retrieved');
 
     } catch (err) {
@@ -54,9 +54,9 @@ class NotificationController extends BaseController{
    * @apiGroup Notification
    */
   async deleteNotification(req, res){
-    const { id } = req.body;
+    const { userId } = req.body;
     try{
-        let notification = await Notification.findOneAndUpdate({_id: id}, {isActive: false});
+        let notification = await Notification.findOneAndUpdate({_id: userId}, {isActive: false});
         return super.actionSuccess(res, 'Notification Deleted');
 
     }catch(err){
@@ -71,9 +71,9 @@ class NotificationController extends BaseController{
    * @apiGroup Notification
    */
   async restoreNotification(req, res){
-    const { id } = req.body;
+    const { userId } = req.body;
     try{
-        let notification = await Notification.findOneAndUpdate({_id: id}, {isActive: true});
+        let notification = await Notification.findOneAndUpdate({_id: userId}, {isActive: true});
         return super.actionSuccess(res, 'Notification Restored');
 
     }catch(err){

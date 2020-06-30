@@ -30,6 +30,28 @@ class AuthValidator extends Helpers{
     return next();
   }
 
+  /**
+   * validates user sign up inputs
+   * @param {object} req
+   * @param {object} res
+   * @param {callback} next
+   */
+  validateProfile(req, res, next) {
+
+    req.check('firstName', 'First Name is required')
+      .notEmpty().trim();
+
+    req.check('lastName', 'Last Name is required')
+    .notEmpty().trim();  
+
+    const errors = req.validationErrors();
+
+    if (errors) {
+      return super.validationFailed(res, super.extractErrors(errors));
+    }
+    return next();
+  }
+
    /**
    * validates user sign up inputs
    * @param {object} req
@@ -39,11 +61,14 @@ class AuthValidator extends Helpers{
   validateAuthLogin(req, res, next) {
     const {provider} = req.body;
     
-    req.check('accessToken', 'Access Token is required')
-      .notEmpty().trim();
+    // req.check('accessToken', 'Access Token is required')
+    //   .notEmpty().trim();
 
     req.check('provider', 'Provider is required')
       .notEmpty().trim();
+
+    req.check('accessToken', 'Access Token is required')
+    .notEmpty().trim();  
 
     req.check('provider', `provider must be either of the following ${PROVIDER.join(', ')}`)
       .custom(() => {

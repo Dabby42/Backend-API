@@ -69,11 +69,11 @@ class BookmarkController extends BaseController{
      * @apiGroup Bookmark
      */
     async removeBookmark(req, res) {
-        const { id } = req.body;
+        const { userId } = req.body;
         try{
-            let user = await User.findOne({_id:id});
+            let user = await User.findOne({_id:userId});
             if (user) {
-                let bookmark = await Bookmark.findOne({user: id});
+                let bookmark = await Bookmark.findOne({user: userId});
                 bookmark.isActive = false;
                 bookmark.save();
                 console.log(bookmark);
@@ -93,11 +93,11 @@ class BookmarkController extends BaseController{
    * @apiGroup Bookmark
    */
   async restoreBookmark(req, res){
-    const { id } = req.body;
+    const { userId } = req.body;
     try{
-        let user = await User.findOne({_id:id});
+        let user = await User.findOne({_id:userId});
         if (user) {
-            let bookmark = await Bookmark.findOne({user: id});
+            let bookmark = await Bookmark.findOne({user: userId});
             bookmark.isActive = true;
             bookmark.save();
             return super.actionSuccess(res, 'Bookmark Restored');
