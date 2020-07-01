@@ -35,7 +35,7 @@ class InterestValidator extends Helpers{
    */
   validateSelectInterest(req, res, next) {
    
-    req.check('interests', 'interests field is required').notEmpty();
+    req.check('interests', 'interests field is required');
 
     req.check('interests', `interests must be an array`)
       .custom(() => {
