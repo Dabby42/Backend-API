@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 let UserInterestSchema = mongoose.Schema({
-    interest: {type: String},
+    interest: { type: mongoose.Schema.Types.ObjectId, ref: "Interest" },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },

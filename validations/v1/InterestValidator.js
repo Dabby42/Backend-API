@@ -19,9 +19,28 @@ class InterestValidator extends Helpers{
   validateInterest(req, res, next) {
    
     req.check('name', 'name field is required').notEmpty().trim();
+    const errors = req.validationErrors();
 
-    req.check('id', 'id field is required').notEmpty().trim();
+    if (errors) {
+        return super.validationFailed(res, super.extractErrors(errors));
+    }
+    return next();
+  }
 
+    /**
+   * validates interest data
+   * @param {object} req
+   * @param {object} res
+   * @param {callback} next
+   */
+  validateSelectInterest(req, res, next) {
+   
+    req.check('interests', 'interests field is required').notEmpty().isAee;
+
+    req.check('interests', `interests must be an array`)
+      .custom(() => {
+         return typeof(req.body.interests) == 'object';
+      });
     const errors = req.validationErrors();
 
     if (errors) {
@@ -43,17 +62,13 @@ class InterestValidator extends Helpers{
 
     req.check('image', 'image must be a base64 string')
         .custom(() => {
-            if (image){
-                if(image.trim().length > 0){
-                    if(isBase64(image, {mime: true})){
-                        
-                        return true;
-                      }else{
-                          return false;
-                      }
-                }
-            }
-            return true;
+         
+            if(isBase64(image, {mime: true})){
+                
+                return true;
+              }else{
+                  return false;
+              }
         });
 
     const errors = req.validationErrors();

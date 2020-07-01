@@ -208,6 +208,27 @@ class AuthController extends BaseController{
 
   }
 
+  async getBearerToken(req, res) {
+    try{
+    const headers = {
+      Authorization:
+        'Basic ' +
+        Buffer.from(
+          '379677495-244O7ySXR8bXPBTpVXjkAU1c3yEyrRtJNo1DG4jA:kWrtrUyS0mKqUpTFYKVLA9NZp5MZqrZS97cq4E4Mm1cZA',
+        ).toString('base64'),
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    };
+    let config = {headers};
+
+    const result = await axios.get('https://api.twitter.com/oauth/authorize?oauth_token=379677495-244O7ySXR8bXPBTpVXjkAU1c3yEyrRtJNo1DG4jA')
+    // const results = await axios.post('https://api.twitter.com/oauth2/token', {grant_type: 'client_credentials'}, config);
+    console.log(result.data);
+  }catch(err){
+    console.log(err.response);
+  }
+ 
+  }
+
   /**
    * 
    * @param {Object} req 

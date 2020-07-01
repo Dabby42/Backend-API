@@ -9,6 +9,7 @@ import './config/dbconnection';
 let cors = require('cors');
 import methodOverride from 'method-override';
 import dotenv from 'dotenv';
+import Seed from './seeders/Seed';
 
 const rfs  = require('rotating-file-stream');
 const app = express();
@@ -88,6 +89,10 @@ app.all('*', (req, res) => {
 });
 
 dotenv.config();
+
+let seed = new Seed();
+
+seed.seedInterest();
 
 //=========================================================
 //Running the server on Port 3000 default
