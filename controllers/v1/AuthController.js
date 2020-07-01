@@ -116,7 +116,7 @@ class AuthController extends BaseController{
 
     }catch(err){
         console.log(err);
-        return super.unauthorized(res, 'Invalid Credentials, could not complete authentication');
+        return super.unauthorized(res, `Invalid Credentials, could not complete authentication via ${provider}`);
     }
   }
 
