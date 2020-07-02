@@ -35,6 +35,24 @@ class SocialValidator extends Helpers{
     return next();
   }
 
+  /**
+   * validates interest data
+   * @param {object} req
+   * @param {object} res
+   * @param {callback} next
+   */
+  validateHasId(req, res, next) {
+    req.body.id = req.params.id;
+    req.check('id', 'id field is required').notEmpty().trim();
+
+    const errors = req.validationErrors();
+
+    if (errors) {
+        return super.validationFailed(res, super.extractErrors(errors));
+    }
+    return next();
+  }
+
 
 
 

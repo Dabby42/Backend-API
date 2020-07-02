@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="">
+   <head>
+       <meta charset="utf-8">
+       <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       <meta name="viewport" content="width=device-width, initial-scale=1">
+       <title>Scrola</title>
+       
+   </head>
+   <body>
+    <script src="https://api.ravepay.co/flwv3-pug/getpaidx/api/flwpbf-inline.js"></script>
+     <script>
+         
+         var mwindow = navigator.appVersion.includes('Android') ? document : window;
+    
+
+        function payWithRave(email, reference, currency, amount, publicKey) {
+            var x = getpaidSetup({
+                PBFPubKey: publicKey,
+                customer_email: email,
+                amount: amount,
+                currency: 'USD',
+                txref: reference,
+                onclose: function() {
+                    window.postMessage(JSON.stringify({
+                         reference: '',
+                         message: 'Transaction Cancelled by user',
+                         status: 'failed'
+                     }))
+                },
+                callback: function(response) {
+                    var txref = response.data.txRef; // collect txRef returned and pass to a                    server page to complete status check.
+                    
+                    if (
+                        response.data.chargeResponseCode == "00" ||
+                        response.data.chargeResponseCode == "0"
+                    ) {
+                        // redirect to a success page
+                        window.postMessage(JSON.stringify({
+                            reference: txref,
+                            message: 'Transaction Successful',
+                            status: 'success'
+                        }));
+                    } else {
+                        window.postMessage(JSON.stringify({
+                         reference: '',
+                         message: 'Transaction Cancelled by user',
+                         status: 'failed'
+                     }));
+                        // redirect to a failure page.
+                    }
+
+                    x.close(); // use this to close the modal immediately after payment.
+                }
+            });
+        }
+         mwindow.addEventListener("message", function(data) {
+             
+             var details = JSON.parse(data.data);
+             payWithRave(details.email, details.reference, details.currency, details.amount, details.publicKey);
+         });
+     </script>
+
+   </body>
+</html>
