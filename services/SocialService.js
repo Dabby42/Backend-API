@@ -22,7 +22,7 @@ class PaymentService {
                 this.processor = new Instagram();
 
             default:
-                this.processor = new Facebook();
+                this.processor = new Instagram();
         }
     }
 

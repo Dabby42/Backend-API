@@ -60,14 +60,15 @@ class SocialController extends AuthController{
       }
       //check if result returns required data
       if(!result) return super.unauthorized(res, 'Authentication could not be completed to account');
-      const {firstName, email, lastName, longLivedAccessToken, socialId} = result;
+      const {firstName, email, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
 
       let social = await Social.findOne({user: userId, provider, socialId});
       if(!social){
-        social = new Social({user, firstName, lastName, longLivedAccessToken, socialId, provider })
+        social = new Social({user:userId, firstName, lastName, longLivedAccessTokenSecret,  longLivedAccessToken, socialId, provider })
         social.save();
       }else{
         social.longLivedAccessToken = longLivedAccessToken;
+        social.longLivedAccessTokenSecret = longLivedAccessTokenSecret;
         social.firstName = firstName;
         social.lastName = lastName;
         social.save();
@@ -75,6 +76,7 @@ class SocialController extends AuthController{
       return super.actionSuccess(res, 'Account Connected Successfully');
       
     }catch(err){
+      console.log(err);
         return super.actionFailure(res, err.message);
     }
   }
@@ -90,9 +92,9 @@ class SocialController extends AuthController{
         const service = new SocialService(provider);
         const social = await Social.findOne({user: userId, provider});
         if(social){
-            const {longLivedAccessToken, firstName, lastName} = social;
-            
-            const timeline = await service.getTimeline({longLivedAccessToken, firstName, lastName});
+            const {longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName} = social;
+           
+            const timeline = await service.getTimeline({longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName});
             return super.success(res, timeline, `Retrieve timeline from ${provider}`);
         }
 

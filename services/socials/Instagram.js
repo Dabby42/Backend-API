@@ -1,5 +1,6 @@
 import axios from 'axios';
 import autoBind from 'auto-bind';
+import secrets from './../../config/secrets';
 
 class Instagram{
 
@@ -7,23 +8,24 @@ class Instagram{
         autoBind(this);
     }
 
-    async getTimeline(){
+    async getTimeline(data){
         const {longLivedAccessToken, firstName, lastName} = data;
         try{
-            let result = await axios.get(`${secrets.facebookBaseUrl}/me/feed?access_token=${longLivedAccessToken}`);
-            
+            let result = await axios.get(`${secrets.instagramBaseUrl}/me/media?fields=timestamp,media_url,caption&access_token=${longLivedAccessToken}`);
+
             let preparedResult = result.data.data.map((item, index) => {
-                item.createdAt = item.created_time;
+                item.createdAt = item.timestamp;
                 item.firstName = firstName;
                 item.lastName = lastName;
-                delete item['created_time'];
+                delete item['timestamp'];
                 return item;
             }).filter((item) => {
-                return item.message != undefined
+                return item.caption != undefined
             })
             return preparedResult;
+          
         }catch(err){
-            console.log(err);
+            console.log(err.message);
             throw new Error(`Couldn't get timeline`);
         }
         
