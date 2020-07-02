@@ -18,7 +18,7 @@ class AuthController extends BaseController{
     autoBind(this);
   }
   /**
-   * @api {post} /o/token Authenticate User
+   * @api {post} v1/auth/register Authenticate User
    * @apiName Authenticate User
    * @apiGroup Auth
    * @apiParam {String} email user's email
@@ -26,6 +26,24 @@ class AuthController extends BaseController{
    */
   async register(req, res) {
     
+  }
+
+  /**
+   * @api {post} v1/auth/profile Update User Profile
+   * @apiName Update User Profile
+   * @apiGroup Auth
+   * @apiParam {String} firstName user's firstName
+   * @apiParam {String} lastName user's lastName
+   */
+  async updateProfile(req, res) {
+    const { userId, lastName, firstName } = req.body;
+
+    try{
+      let user = await User.findOneAndUpdate({_id: userId}, {firstName, lastName}, {new: true});
+      return super.success(res, user, 'Profile updated')
+    }catch(err){
+      return super.actionFailure(res, 'Couldnt update profile');
+    }
   }
 
   /**
@@ -97,7 +115,7 @@ class AuthController extends BaseController{
 
     }catch(err){
         console.log(err);
-        return super.unauthorized(res, 'Invalid Credentials, could not complete authentication');
+        return super.unauthorized(res, `Invalid Credentials, could not complete authentication via ${provider}`);
     }
   }
 
@@ -114,7 +132,29 @@ class AuthController extends BaseController{
    * @apiParam {String} refreshToken User's refresh token
    */
   async refreshToken(req, res, next){
+    const {id, email, refreshToken} = req.body;
+    try{
+      let user = await User.findOne({_id: id, email, refreshToken});
+      if(user){
 
+        // also add the claims here when the role management is setup
+        let roles = await user.getRolesForUser();
+        let claims = await user.getClaimsForUser();
+        
+
+        let {email, firstName, lastName, provider, socialId} = user;
+
+        let token = jwt.sign({ firstName, email, id: user._id, roles, claims, lastName },secrets.jwtSecret,{expiresIn: secrets.jwtTtl});
+      
+        return super.success(res,{ token, user, refreshToken: user.refreshToken, roles, claims }, 'Token refresh Successful');  
+      }else{
+        return super.notFound(res, "Account does not exist");
+      }
+      
+    }catch(err){
+      console.log(err);
+      return super.unauthorized(res, 'Invalid Credentials');
+    }
 
   }
 
@@ -235,6 +275,27 @@ class AuthController extends BaseController{
       return super.actionFailure(res, `Couldn't retrieve request token`);
     }
          
+  }
+
+  async getBearerToken(req, res) {
+    try{
+    const headers = {
+      Authorization:
+        'Basic ' +
+        Buffer.from(
+          '379677495-244O7ySXR8bXPBTpVXjkAU1c3yEyrRtJNo1DG4jA:kWrtrUyS0mKqUpTFYKVLA9NZp5MZqrZS97cq4E4Mm1cZA',
+        ).toString('base64'),
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    };
+    let config = {headers};
+
+    const result = await axios.get('https://api.twitter.com/oauth/authorize?oauth_token=379677495-244O7ySXR8bXPBTpVXjkAU1c3yEyrRtJNo1DG4jA')
+    // const results = await axios.post('https://api.twitter.com/oauth2/token', {grant_type: 'client_credentials'}, config);
+    console.log(result.data);
+  }catch(err){
+    console.log(err.response);
+  }
+ 
   }
 
   /**

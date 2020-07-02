@@ -6,6 +6,7 @@ import User from './../../models/User';
 import dotenv from 'dotenv';
 
 import imageService from './../../services/ImageService';
+import { use } from '../../routes/v1/AuthRoute';
 dotenv.config();
 
 class InterestController extends BaseController{
@@ -45,29 +46,23 @@ class InterestController extends BaseController{
     }
 
     /**
-     * @api {post} /v1/interest/select Get User's Interest
-     * @apiName Get User's Interest
+     * @api {post} /v1/interest/select Add User's Interest
+     * @apiName Add User's Interest
      * @apiGroup Interest
      */
 
     async selectInterest(req, res) {
-        const { interestName, userId} = req.body;
+        const { interests, userId} = req.body;
         try {
-            let user = await User.findOne({_id:userId});
-            if (user) {
-                let interest = await Interest.findOne({name:interestName, isActive: true});
-                // let name = interest.name;
-                // console.log(data);
-                if (interest) {
-                    let userInterest = new UserInterest();
-                    userInterest.interest = interestName;
-                    userInterest.user = userId;
+            interests.map(async (interest) => {
+                let userInterest = await UserInterest.findOne({user: userId, interest});
+               
+                if(!userInterest){
+                    userInterest = new UserInterest({user: userId, interest});
                     await userInterest.save();
-                    return super.actionSuccess(res, 'Interest selected successfully');
                 }
-                return super.notfound(res, `interest not found`);
-            }
-            return super.notfound(res, `user not found`);
+            })
+            return super.actionSuccess(res, `user interest updated`);
             
         } catch (error) {
             console.log(error);
@@ -115,22 +110,33 @@ class InterestController extends BaseController{
   }
 
     /**
-   * @api {get} /v1/interest/:id Retrieve users interest
-   * @apiName Retrieve Interest
+   * @api {get} /v1/interest Retrieve interests
+   * @apiName Retrieve Interests
    * @apiGroup Interest
    */
   async getInterest(req, res){
-    const { userId } = req.body;
     try {
-        let user = await User.findOne({_id:userId});
-        if (user) {
-            let userInterest = await UserInterest.find({user: userId});
-            return super.actionSuccess(res, userInterest,'Interest has been retrieved successfully');
-        }
-        return super.notfound(res, `user not found`);
+        let interest = await Interest.find({isActive: true});
+        return super.success(res, interest,'Interest has been retrieved successfully');
     } catch (error) {
         console.log(err);
-        return super.actionFailure(res, `Couldn't retrieve user interest`);
+        return super.actionFailure(res, `Couldn't retrieve interest`);
+    }
+  }
+
+/**
+   * @api {get} /v1/interest/user Retrieve User interests
+   * @apiName Retrieve User Interests
+   * @apiGroup Interest
+*/
+  async getUserInterest(req, res){
+    const {userId} = req.body;
+    try {
+        let interest = await UserInterest.find({isActive: true, user: userId});
+        return super.success(res, interest,'User Interest has been retrieved successfully');
+    } catch (error) {
+        console.log(err);
+        return super.actionFailure(res, `Couldn't User retrieve interest`);
     }
   }
 

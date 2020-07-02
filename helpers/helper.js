@@ -78,6 +78,23 @@ class Helpers {
    * @param {string} message 
    * Formats response for unauthorized requests
    */
+  expiredToken(res, message){
+    let response = {
+            status: FAILED,
+            status_code: HTTP_UNAUTHORIZED, 
+            message,
+            expiredToken: true
+            
+    }
+    return res.status(HTTP_UNAUTHORIZED).send(response)
+  }
+
+  /**
+   * 
+   * @param {object} res 
+   * @param {string} message 
+   * Formats response for unauthorized requests
+   */
   unauthorized(res, message){
     let response = {
             status: FAILED,

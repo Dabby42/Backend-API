@@ -9,6 +9,7 @@ let UserSchema = mongoose.Schema({
   password: {type: String},
   avatar: {type: String},
   provider: {type: String, required: true},
+  refreshToken: {type: String},
   socialId: {type: String},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
