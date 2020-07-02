@@ -48,9 +48,6 @@ const secrets = {
   twitterConsumerKey: process.env.TWITTER_CONSUMER_KEY,
   twitterConsumerSecret: process.env.TWITTER_CONSUMER_SECRET,
   twitterCallbackUri: process.env.TWITTER_CALLBACK_URI,
-  twitterAccessTokenKey: process.env.TWITTER_ACCESS_TOKEN_KEY,
-  twitterAccessTokenSecretKey: process.env.TWITTER_ACCESS_TOKEN_SECRET_KEY,
-  twitterBearerToken: process.env.TWITTER_BEARER_TOKEN,
   twitterBaseUrl: process.env.TWITTER_BASE_URL,
 
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY,

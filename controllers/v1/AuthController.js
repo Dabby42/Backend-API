@@ -5,13 +5,11 @@ import BaseController from './BaseController';
 import User from './../../models/User';
 import Social from './../../models/Social';
 import dotenv from 'dotenv';
-import axios from 'axios';
-import twitter from 'twitter';
+import axios from 'axios'; 
 import secrets from './../../config/secrets';
 import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
+import Twitter from 'twitter-lite';
 dotenv.config();
-
-
 
 class AuthController extends BaseController{
 
@@ -61,7 +59,7 @@ class AuthController extends BaseController{
 
       //check if result returns required data
       if(!result) return super.unauthorized(res, 'Authentication could not be completed');
-      const {firstName, email, lastName, longLivedAccessToken, socialId} = result;
+      const {firstName, email, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
       
       let user = await User.findOne({email, provider});
 
@@ -85,10 +83,11 @@ class AuthController extends BaseController{
       let social = await Social.findOne({user: user._id, provider, socialId});
       
       if(!social){
-        social = new Social({user, firstName, lastName, longLivedAccessToken, socialId, provider })
+        social = new Social({user, firstName, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId, provider })
         social.save();
       }else{
         social.longLivedAccessToken = longLivedAccessToken;
+        social.longLivedAccessTokenSecret =longLivedAccessTokenSecret;
         social.firstName = firstName;
         social.lastName = lastName;
         social.save();
@@ -152,19 +151,33 @@ class AuthController extends BaseController{
    */
   async authenticateTwitter(req, res){
     //access tokens are not explicitly expired
-    const {accessToken} = req.body;
+    const {accessToken, accessTokenSecret} = req.body;
     // write twitter implementation for log in and implement long lived token
+    const client = new Twitter({
+      subdomain: "api", 
+      version: "1.1", 
+      consumer_key: secrets.twitterConsumerKey, 
+      consumer_secret: secrets.twitterConsumerSecret, 
+      access_token_key: accessToken, 
+      access_token_secret: accessTokenSecret 
+    });
+    
     try {
-      let profile = await axios.get(`${secrets.twitterBaseUrl}/1.1/account/verify_credentials.json`);
-      console.log(profile);
-      
-      const {name, screen_name, email, id_str} = profile;
-
-      return {socialId: id_str, email, longLivedAccessToken: accessToken,  firstName: name, lastName: screen_name }
-    } catch (err) {
+      let profile = await client.get("account/verify_credentials");
+      const {name, screen_name, id_str} = profile
+      let email = "dabbyvalentino@yahoo.com";
+    
+      return {
+        socialId: id_str, 
+        email:email, 
+        longLivedAccessToken: accessToken,
+        longLivedAccessTokenSecret: accessTokenSecret, 
+        firstName: name, 
+        lastName: screen_name 
+      }
+    } catch (error) {
       throw new Error('Couldnt authenticate user');
     }
-
 
   }
 
@@ -174,9 +187,89 @@ class AuthController extends BaseController{
    * @param {Object} res 
    */
   async authenticateInstagram(req, res){
+    const {accessToken} = req.body;
+    // write facebook implementation for log in and implement long lived token
     
-  }  
+    try {
+      let longLivedToken = await axios.get(`${secrets.instagramBaseUrl}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
+      
+      if (longLivedToken) {
+        let profile = await axios.get(`${secrets.instagramBaseUrl}/me?fields=id,username&access_token=${longLivedToken.data.access_token}`);
+        const {username, id} = profile.data;
 
+        return {socialId: id, email:username, longLivedAccessToken: longLivedToken.data.access_token,  firstName: username, lastName: username }
+      } else {
+        throw new Error('Couldnt authenticate user')
+      }
+    } catch (err) {
+      throw new Error('Couldnt authenticate user')
+    }
+
+  }
+
+   /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   */
+  async getTwitterRequestToken(req, res){
+    let client = new Twitter({
+      consumer_key: secrets.twitterConsumerKey,
+      consumer_secret: secrets.twitterConsumerSecret
+    });
+    try {
+      let response = await client.getRequestToken("http://localhost:5000/auth/twitter/redirect")
+      let reqTkn = response.oauth_token;
+      let reqTknSecret = response.oauth_token_secret
+      
+      let data = {
+        reqTkn, 
+        reqTknSecret,
+        redirectUrl: `https://twitter.com/oauth/authorize?oauth_token=${reqTkn}`
+      }
+      
+      return super.success(res, data, 'Request Token retrieved');
+
+    } catch (error) {
+      console.log(error);
+      return super.actionFailure(res, `Couldn't retrieve request token`);
+    }
+         
+  }
+
+  /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   */
+  async getTwitterAccessToken(req, res){
+    const client = new Twitter({
+      consumer_key: secrets.twitterConsumerKey,
+      consumer_secret: secrets.twitterConsumerSecret
+    });
+
+    try {
+      let oauthVerifier = req.params.oauth_verifier;
+      let oauthToken = req.params.oauth_token
+      let response = await client.getAccessToken({oauth_verifier: oauthVerifier, oauth_token: oauthToken})
+      
+      let accTkn = response.oauth_token;
+      let accTknSecret = response.oauth_token_secret;
+      let screenName = response.screen_name;
+
+      let data = {accTkn, accTknSecret, screenName}
+      return super.success(res, data, 'Access Token retrieved');
+
+    } catch (error) {
+      console.log(error);
+      return super.actionFailure(res, `Couldn't retrieve access token`);
+    }
+  
+  }
+  
 }
+
+
+
 
 module.exports = AuthController;

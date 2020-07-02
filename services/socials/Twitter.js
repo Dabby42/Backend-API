@@ -1,19 +1,30 @@
 import axios from 'axios';
 import autoBind from 'auto-bind';
+import secrets from './../../config/secrets';
+import Twitter from 'twitter-lite';
 
-class Twitter{
+class twitter{
 
     constructor(){
         autoBind(this);
     }
 
     async getTimeline(data){
-        const {firstName, lastName} = data; 
+        const {longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName} = data; 
+
+        const client = new Twitter({
+            consumer_key: secrets.twitterConsumerKey,
+            consumer_secret: secrets.twitterConsumerSecret,
+            access_token_key: longLivedAccessToken,
+            access_token_secret: longLivedAccessTokenSecret
+          });
+          
+        
         
         try{
-            let result = await axios.get(`${secrets.twitterBaseUrl}/1.1/statuses/home_timeline.json?count=20`);
+            let tweets = await client.get("statuses/home_timeline");
             
-            let preparedResult = result.map((item, index) => {
+            let preparedTweets = tweets.map((item, index) => {
                 item.createdAt = item.created_at;
                 item.firstName = firstName;
                 item.lastName = lastName;
@@ -22,7 +33,7 @@ class Twitter{
             }).filter((item) => {
                 return item.text != undefined
             })
-            return preparedResult;
+            return preparedTweets;
         }catch(err){
             console.log(err);
             throw new Error(`Couldn't get timeline`);
@@ -32,4 +43,4 @@ class Twitter{
    
 }
 
-module.exports = Twitter;
+module.exports = twitter;

@@ -4,6 +4,7 @@ let SocialSchema = mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     provider: {type: String, required: true},
     longLivedAccessToken: {type: String, required: true},
+    longLivedAccessTokenSecret: {type: String},
     firstName: {type: String},
     lastName: {type: String},
     socialId: {type: String, required: true},

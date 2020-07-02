@@ -23,9 +23,10 @@ class SocialController extends BaseController{
         const service = new SocialService(provider);
         const social = await Social.findOne({user: userId, provider});
         if(social){
-            const {longLivedAccessToken, firstName, lastName} = social;
+            const {longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName} = social;
+            console.log(social);
             
-            const timeline = await service.getTimeline({longLivedAccessToken, firstName, lastName});
+            const timeline = await service.getTimeline({longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName});
             return super.success(res, timeline, `Retrieve timeline from ${provider}`);
         }
 
