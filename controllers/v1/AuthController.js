@@ -9,6 +9,8 @@ import axios from 'axios';
 import secrets from './../../config/secrets';
 import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
 import Twitter from 'twitter-lite';
+const {AuthorizationCode} = require('simple-oauth2');
+const oauth = require('axios-oauth-client');
 dotenv.config();
 
 class AuthController extends BaseController{
@@ -227,17 +229,19 @@ class AuthController extends BaseController{
    * @param {Object} res 
    */
   async authenticateInstagram(req, res){
-    const {accessToken} = req.body;
-    // write facebook implementation for log in and implement long lived token
+    
+    // write instagram implementation for log in and implement long lived token
     
     try {
+      const {accessToken} = req.body;
+      
       let longLivedToken = await axios.get(`${secrets.instagramBaseUrl}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
       
       if (longLivedToken) {
         let profile = await axios.get(`${secrets.instagramBaseUrl}/me?fields=id,username&access_token=${longLivedToken.data.access_token}`);
         const {username, id} = profile.data;
-
-        return {socialId: id, email:username, longLivedAccessToken: longLivedToken.data.access_token,  firstName: username, lastName: username }
+        let email ="dabbyvalentino@yahoo.com";
+        return {socialId: id, email, longLivedAccessToken: longLivedToken.data.access_token,  firstName: username, lastName: username }
       } else {
         throw new Error('Couldnt authenticate user')
       }
@@ -277,6 +281,60 @@ class AuthController extends BaseController{
          
   }
 
+  /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   */
+  async getInstagramAccessToken(req, res){
+    
+    const code = req.params.code;
+    const getAuthorizationCode = oauth.client(axios.create(), {
+      url: 'https://api.instagram.com/oauth/access_token',
+      grant_type: 'authorization_code',
+      client_id: secrets.instagramClientId,
+      client_secret: secrets.instagramAppSecret,
+      redirect_uri: secrets.instagramRedirectUri,
+      code: code,
+    });
+
+    try {
+      const accessToken = await getAuthorizationCode();
+      console.log(accessToken);
+      
+      let result = accessToken.access_token;
+      console.log('The resulting token: ', result);
+
+      return super.success(res, result, 'Access Token retrieved');
+    } catch (error) {
+      console.error('Access Token Error', error.message);
+      return super.actionFailure(res, `Couldn't retrieve request token`);
+    }
+
+  }
+  
+  //getting the authorization dialog
+  async getInstagramAuthorizationCode(req, res){
+    const config = {
+      client: {
+        id: secrets.instagramClientId,
+        secret: secrets.instagramAppSecret,
+      },
+      auth: {
+        tokenHost: 'https://api.instagram.com',
+        tokenPath: '/oauth/access_token',
+        authorizePath: '/oauth/authorize',
+      }
+    };
+    const client = new AuthorizationCode(config);
+    const authorizationUri = client.authorizeURL({
+      redirect_uri: secrets.instagramRedirectUri,
+      scope: "user_profile,user_media",
+    });
+
+    res.redirect(authorizationUri);
+  }
+
   async getBearerToken(req, res) {
     try{
     const headers = {
@@ -305,8 +363,8 @@ class AuthController extends BaseController{
    */
   async getTwitterAccessToken(req, res){
     const client = new Twitter({
-      consumer_key: secrets.twitterConsumerKey,
-      consumer_secret: secrets.twitterConsumerSecret
+      consumer_key: secreets.twitterConsumerKey,
+      consumer_secret: screts.twitterConsumerSecret
     });
 
     try {
