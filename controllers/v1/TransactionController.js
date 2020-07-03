@@ -31,8 +31,9 @@ class TransactionController extends BaseController{
         });
 
 
-        await transaction.save();
-
+        transaction = await transaction.save();
+        transaction = await Transaction.findOne({_id: transaction._id}).populate('subscription').exec();
+        
         return super.success(res, transaction, 'Created Transaction Successfully');
 
     }catch(err){

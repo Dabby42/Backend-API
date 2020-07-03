@@ -29,6 +29,7 @@ class SocialController extends AuthController{
         return super.actionFailure(res, `Couldn't retrieve social accounts`);
     }
   }
+  
 
    /**
    * @api {post} /v1/social/connect Connect Account
@@ -60,14 +61,15 @@ class SocialController extends AuthController{
       }
       //check if result returns required data
       if(!result) return super.unauthorized(res, 'Authentication could not be completed to account');
-      const {firstName, email, lastName, longLivedAccessToken, socialId} = result;
+      const {firstName, email, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
 
       let social = await Social.findOne({user: userId, provider, socialId});
       if(!social){
-        social = new Social({user, firstName, lastName, longLivedAccessToken, socialId, provider })
+        social = new Social({user:userId, firstName, lastName, longLivedAccessTokenSecret,  longLivedAccessToken, socialId, provider })
         social.save();
       }else{
         social.longLivedAccessToken = longLivedAccessToken;
+        social.longLivedAccessTokenSecret = longLivedAccessTokenSecret;
         social.firstName = firstName;
         social.lastName = lastName;
         social.save();
@@ -75,6 +77,7 @@ class SocialController extends AuthController{
       return super.actionSuccess(res, 'Account Connected Successfully');
       
     }catch(err){
+      console.log(err);
         return super.actionFailure(res, err.message);
     }
   }
@@ -91,8 +94,7 @@ class SocialController extends AuthController{
         const social = await Social.findOne({user: userId, provider});
         if(social){
             const {longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName} = social;
-            console.log(social);
-            
+           
             const timeline = await service.getTimeline({longLivedAccessToken, longLivedAccessTokenSecret, firstName, lastName});
             return super.success(res, timeline, `Retrieve timeline from ${provider}`);
         }
@@ -131,6 +133,25 @@ class SocialController extends AuthController{
         return super.actionFailure(res, `Couldn't retrieve avatar`);
     }
 }
+
+
+  /**
+   * @api {post} /v1/social/:id Delete Social Account
+   * @apiName Delete Social Account
+   * @apiGroup Social
+   * @apiParam {String} id social id
+   * @param {Object} req 
+   * @param {Object} res 
+   */
+  async deleteConnectedAccount(req, res){
+    const {userId, id} = req.body;
+    try{
+        await Social.findOneAndDelete({_id: id, user: userId});
+        return super.actionSuccess(res, 'Deleted Account');
+    }catch(err){
+       return super.actionFailure(res, `Could not delete account`);
+    }
+  }
 
 
 

@@ -17,7 +17,7 @@ class TransactionValidator extends Helpers{
    */
   validateTransaction(req, res, next) {
     const {channel} = req.body;
-    let channels = ['paystack', 'paypal'];
+    let channels = ['paystack', 'paypal', 'rave'];
     req.check('channel', 'channel field is required').notEmpty().trim();
 
     req.check('subscription', 'subscription field is required').notEmpty().trim();

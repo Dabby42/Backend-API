@@ -193,7 +193,7 @@ class AuthController extends BaseController{
    */
   async authenticateTwitter(req, res){
     //access tokens are not explicitly expired
-    const {accessToken, accessTokenSecret} = req.body;
+    const {accessToken, email, accessTokenSecret} = req.body;
     // write twitter implementation for log in and implement long lived token
     const client = new Twitter({
       subdomain: "api", 
@@ -206,8 +206,8 @@ class AuthController extends BaseController{
     
     try {
       let profile = await client.get("account/verify_credentials");
+    
       const {name, screen_name, id_str} = profile
-      let email = "dabbyvalentino@yahoo.com";
     
       return {
         socialId: id_str, 
@@ -218,6 +218,7 @@ class AuthController extends BaseController{
         lastName: screen_name 
       }
     } catch (error) {
+      console.log(error);
       throw new Error('Couldnt authenticate user');
     }
 
