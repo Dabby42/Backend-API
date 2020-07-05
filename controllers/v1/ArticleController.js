@@ -27,23 +27,24 @@ class ArticleController extends BaseController{
    * @apiParam {String} sourceImage ImageSource of the Article
    */
   async createArticle(req, res) {
-    let {content, sourceImage, userId, publish, source, title, backgroundImage, image} = req.body;
+    let {content, sourceImage, userId, publish, interest, source, title, backgroundImage, image} = req.body;
 
     try{
         //have a default background image
+       
         const service = new imageService('cloudinary');
 
         // checks if base64 image version exists and uploads to cloudinary
-        if(backgroundImage)backgroundImage = await service.uploadBase64Image(backgroundImage);
-        if(image)image = await service.uploadBase64Image(image);
-        if(sourceImage)sourceImage = await service.uploadBase64Image(sourceImage);
+        if(backgroundImage)backgroundImage = super.isValidUrl(backgroundImage) ? backgroundImage : await service.uploadBase64Image(backgroundImage).url;
+        if(image)image = super.isValidUrl(image) ? image : await service.uploadBase64Image(image).url;
+        if(sourceImage)sourceImage = super.isValidUrl(sourceImage) ? sourceImage : await service.uploadBase64Image(sourceImage).url;
 
-        let data = {content, title, userId, published: publish};
+        let data = {content, title, userId, interest, published: publish};
 
         // checks if image uploaded and add it to the data
-        if(backgroundImage) data.backgroundImage = backgroundImage.url;
-        if(image) data.image = image.url;
-        if(sourceImage) data.sourceImage = sourceImage.url;
+        if(backgroundImage) data.backgroundImage = backgroundImage;
+        if(image) data.image = image;
+        if(sourceImage) data.sourceImage = sourceImage;
         if(sourceImage) data.source = source;
 
         let article = new Article(data);
@@ -52,9 +53,10 @@ class ArticleController extends BaseController{
         return super.success(res, article, 'Created Article Successfully');
 
     }catch(err){
-        if(backgroundImage) await service.deleteImage(backgroundImage.id);
-        if(image) await service.deleteImage(image.id);
-        if(sourceImage) await service.deleteImage(sourceImage.id);
+        // if(backgroundImage) await service.deleteImage(backgroundImage.id);
+        // if(image) await service.deleteImage(image.id);
+        // if(sourceImage) await service.deleteImage(sourceImage.id);
+        console.log(err);
         return super.actionFailure(res, `Couldn't create article`);
     }
   }
@@ -66,7 +68,7 @@ class ArticleController extends BaseController{
    */
   async getPublishedArticle(req, res){
     try{
-        let article = await Article.find({published: true, isActive: true});
+        let article = await Article.find({published: true, isActive: true}).populate('interest');
         return super.success(res, article, 'Article Retrieved');
 
     }catch(err){

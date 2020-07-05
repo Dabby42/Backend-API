@@ -5,37 +5,18 @@ const hasRolesAndClaims = require('gatemanjs').hasRolesAndClaims(mongoose);
 let UserSchema = mongoose.Schema({
   firstName: {type: String},
   lastName: {type: String},
-  email: {type: String, unique: true, index: true},
+  email: {type: String, index: true},
   password: {type: String},
   avatar: {type: String},
   provider: {type: String, required: true},
   refreshToken: {type: String},
+  roles: [{type: String}],
+  claims: [{type: String}],
   socialId: {type: String},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
   userSubscription: { type: mongoose.Schema.Types.ObjectId, ref: "UserSubscription" },
-});
-
-UserSchema.pre('save', function(next) {
-  const user = this;
-  if (!user.isModified('password')) {
-    return next();
-  }
-
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) {
-      return next(err);
-    }
-
-    bcrypt.hash(user.password, salt, (err, hash) => {
-      if (err) {
-        return next(err);
-      }
-      user.password = hash;
-      next();
-    });
-  });
 });
 
 UserSchema.methods.toJSON = function() {

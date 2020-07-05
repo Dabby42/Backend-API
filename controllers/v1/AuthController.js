@@ -18,14 +18,91 @@ class AuthController extends BaseController{
     autoBind(this);
   }
   /**
-   * @api {post} v1/auth/register Authenticate User
-   * @apiName Authenticate User
+   * @api {post} v1/auth/login Login User with email and password
+   * @apiName Login User with email and password
    * @apiGroup Auth
    * @apiParam {String} email user's email
    * @apiParam {String} password user's password
    */
+  login = async (req, res) => {
+    const { email, password, provider } = req.body;
+    try{
+      let user = await User.findOne({ email, provider });
+   
+      if(user){
+        const {firstName, email, _id, lastName} = user;
+        let isPasswordValid = bcrypt.compareSync(password, user.password);
+       
+          if (isPasswordValid) {
+
+            if(!user.isActive) return super.actionFailure(res, 'Account has been deactivated');
+
+            // also add the claims here when the role management is setup
+            let roles = await user.getRolesForUser();
+            let claims = await user.getClaimsForUser();
+            
+            // generate short lived token
+            let token = jwt.sign({ firstName, email, id: _id, roles, claims, lastName },secrets.jwtSecret,{expiresIn: secrets.jwtTtl});
+            // genrates refresh long lived token
+            
+            let refreshToken = jwt.sign({ email, id: _id }, secrets.jwtRefreshSecret,{expiresIn: secrets.jwtRefreshTtl });
+            
+            user.refreshToken = refreshToken;
+            req.body.userId = _id;
+            user = await user.save();
+            return super.success(res,{ token, user, refreshToken, roles, claims }, 'Login Successful');
+
+          } else {
+            return super.unauthorized(res, 'Invalid Credentials');
+          }
+      }else{
+        return super.notFound(res, "Account does not exist");
+      }
+    }catch(err){
+        console.log(err);
+        return super.unauthorized(res, 'Invalid Credentials 1');
+    }
+  }
+  
+
+  /**
+   * @api {post} v1/auth/register Authenticate User
+   * @apiName Authenticate User
+   * @apiGroup Auth
+   * @apiParam {String} email user's email
+   * @apiParam {String} firstName user's firstName
+   * @apiParam {String} lastName user's lastName
+   * @apiParam {String} provider provider
+   * @apiParam {String} password user's password
+   */
   async register(req, res) {
+     
+    const { email, password, firstName, provider, lastName} = req.body;
+        
+    let hashedPassword = bcrypt.hashSync(password, 8);
     
+    let user = new User({
+        email, password: hashedPassword, firstName, lastName, 
+        provider
+    });
+    
+    try{
+      let newUser = await user.save();
+        // also add the claims here when the role management is setup
+      let roles = await user.getRolesForUser();
+      let claims = await user.getClaimsForUser();
+      
+      // generate short lived token
+      let token = jwt.sign({ firstName, email, id: user._id, roles, claims, lastName },secrets.jwtSecret,{expiresIn: secrets.jwtTtl});
+      // genrates refresh long lived token
+      let refreshToken = jwt.sign({ email, id: user._id }, secrets.jwtRefreshSecret,{expiresIn: secrets.jwtRefreshTtl });
+      
+      return super.success(res,{ token, user, refreshToken, roles, claims }, 'Registration Successful');
+        
+    }catch(error){
+        console.log(error);
+        return super.actionFailure(res, 'Something went wrong')
+    }
   }
 
   /**
@@ -70,6 +147,8 @@ class AuthController extends BaseController{
         case INSTAGRAM:
           result = await this.authenticateInstagram(req, res);
           break
+
+        
 
         default:
           result = await this.authenticateFacebook(req, res);

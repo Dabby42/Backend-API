@@ -17,11 +17,14 @@ class ArticleValidator extends Helpers{
    * @param {callback} next
    */
   validateArticle(req, res, next) {
+    
     const {backgroundImage, source, image, sourceImage} = req.body;
-   
+    
     req.check('content', 'content field is required').notEmpty().trim();
 
     req.check('title', 'title field is required').notEmpty().trim();
+
+    req.check('interest', 'category field is required').notEmpty().trim();
 
     req.check('source', 'source field is required')
         .custom(() => {
@@ -33,53 +36,81 @@ class ArticleValidator extends Helpers{
             }
         })
 
+
     req.check('sourceImage', 'sourceImage must be a base64 string')
         .custom(() => {
-            if(source){
-                if (sourceImage){
-                    if(sourceImage.trim().length > 0){
-                        if(isBase64(sourceImage, {mime: true})){
+          let isValid = false;
+          if(super.isValidUrl(sourceImage)){
+            isValid = true;
+          }
+          if(sourceImage && isBase64(sourceImage, {mime: true})){
+            isValid = true;;
+          }
+          
+          return isValid
+        })
+
+    // req.check('sourceImage', 'sourceImage must be a base64 string')
+    //     .custom(() => {
+    //         if(source){
+    //             if (sourceImage){
+    //                 if(sourceImage.trim().length > 0){
+    //                     if(isBase64(sourceImage, {mime: true})){
                             
-                            return true;
-                          }else{
-                              return false;
-                          }
-                    }
-                }
-            }
+    //                         return true;
+    //                       }else{
+    //                           return false;
+    //                       }
+    //                 }
+    //             }
+    //         }
             
-            return true;
-        });
+    //         return true;
+    //     });
 
-    req.check('backgroundImage', 'backgroundImage must be a base64 string')
-        .custom(() => {
-            if (backgroundImage){
-                if(backgroundImage.trim().length > 0){
-                    if(isBase64(backgroundImage, {mime: true})){
-                        
-                        return true;
-                      }else{
-                          return false;
-                      }
-                }
-            }
-            return true;
-        });
+    
 
-    req.check('image', 'image must be a base64 string')
-        .custom(() => {
-            if (image){
-                if(image.trim().length > 0){
-                    if(isBase64(image, {mime: true})){
+    // req.check('backgroundImage', 'backgroundImage must be a base64 string')
+    //     .custom(() => {
+    //         if (backgroundImage){
+    //             if(backgroundImage.trim().length > 0){
+    //                 if(isBase64(backgroundImage, {mime: true})){
                         
-                        return true;
-                      }else{
-                          return false;
-                      }
-                }
-            }
-            return true;
-        });
+    //                     return true;
+    //                   }else{
+    //                       return false;
+    //                   }
+    //             }
+    //         }
+    //         return true;
+    //     });
+    req.check('image', 'image must be a base64 string or url')
+        .custom(() => {
+          let isValid = false;
+          if(super.isValidUrl(image)){
+            isValid = true;
+          }
+          if(image && isBase64(image, {mime: true})){
+            isValid = true;;
+          }
+          
+          return isValid
+        })
+
+    // req.check('image', 'image must be a base64 string')
+    //     .custom(() => {
+    //         if (image){
+    //             if(image.trim().length > 0){
+    //                 if(isBase64(image, {mime: true})){
+                        
+    //                     return true;
+    //                   }else{
+    //                       return false;
+    //                   }
+    //             }
+    //         }
+    //         return true;
+    //     });
 
     const errors = req.validationErrors();
 
