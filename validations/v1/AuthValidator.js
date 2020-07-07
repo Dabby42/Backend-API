@@ -1,5 +1,7 @@
 import Helpers from '../../helpers/helper';
 import {PROVIDER} from './../../config/enums';
+import User from './../../models/User';
+
 /**
  * Defines methods for validating Auth functions
  *
@@ -15,18 +17,32 @@ class AuthValidator extends Helpers{
    * @param {object} res
    * @param {callback} next
    */
-  validateAuth(req, res, next) {
+  async validateAuth(req, res, next) {
+    let hasUser = null;
+    let email = req.body.email;
+    try{
+      if(email) email = req.body.email.toLowerCase();
+      hasUser = await User.findOne({email, provider: 'email'});
+      
+    }catch(error){
+      
+    }
     req.check('firstName', 'First Name is required').notEmpty().trim();
     req.check('lastName', 'Last Name is required').notEmpty().trim();
     req.check('email', 'Email field is required').notEmpty().trim().isEmail().withMessage('Invalid email');
     req.check('password', 'Password is required').notEmpty().trim().isLength({ min: 6 })
       .withMessage('password cannot be less then 6 characters');
-    
+
+    req.check('email', 'Email already exists')
+      .custom(() => {
+         return hasUser == null ? true : false;
+      });
     const errors = req.validationErrors();
 
     if (errors) {
       return super.validationFailed(res, super.extractErrors(errors));
     }
+    req.body.email = email;
     return next();
   }
 
@@ -49,6 +65,7 @@ class AuthValidator extends Helpers{
     if (errors) {
       return super.validationFailed(res, super.extractErrors(errors));
     }
+    
     return next();
   }
 
