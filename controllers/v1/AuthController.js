@@ -150,8 +150,6 @@ class AuthController extends BaseController{
           result = await this.authenticateInstagram(req, res);
           break
 
-        
-
         default:
           result = await this.authenticateFacebook(req, res);
       }
@@ -311,21 +309,22 @@ class AuthController extends BaseController{
   async authenticateInstagram(req, res){
     
     // write instagram implementation for log in and implement long lived token
-    
+
     try {
-      const {accessToken} = req.body;
+      const {accessToken, email} = req.body;
       
       let longLivedToken = await axios.get(`${secrets.instagramBaseUrl}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
-      
+      console.log(longLivedToken.data);
       if (longLivedToken) {
         let profile = await axios.get(`${secrets.instagramBaseUrl}/me?fields=id,username&access_token=${longLivedToken.data.access_token}`);
         const {username, id} = profile.data;
-        let email ="dabbyvalentino@yahoo.com";
+
         return {socialId: id, email, longLivedAccessToken: longLivedToken.data.access_token,  firstName: username, lastName: username }
       } else {
         throw new Error('Couldnt authenticate user')
       }
     } catch (err) {
+      console.log(err);
       throw new Error('Couldnt authenticate user')
     }
 
