@@ -22,27 +22,29 @@
                 currency: 'USD',
                 txref: reference,
                 onclose: function() {
-                    window.postMessage(JSON.stringify({
+                    
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
                          reference: '',
                          message: 'Transaction Cancelled by user',
                          status: 'failed'
                      }))
                 },
                 callback: function(response) {
-                    var txref = response.data.txRef; // collect txRef returned and pass to a                    server page to complete status check.
+                    var txref = response.data.transactionobject.txRef; // collect txRef returned and pass to a                    server page to complete status check.
+                    // console.log(response);
                     
                     if (
-                        response.data.chargeResponseCode == "00" ||
-                        response.data.chargeResponseCode == "0"
+                        response.data.transactionobject.chargeResponseCode == "00" ||
+                        response.data.transactionobject.chargeResponseCode == "0"
                     ) {
                         // redirect to a success page
-                        window.postMessage(JSON.stringify({
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
                             reference: txref,
                             message: 'Transaction Successful',
                             status: 'success'
                         }));
                     } else {
-                        window.postMessage(JSON.stringify({
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
                          reference: '',
                          message: 'Transaction Cancelled by user',
                          status: 'failed'

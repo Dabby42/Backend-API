@@ -2,9 +2,12 @@ import autoBind from 'auto-bind';
 import BaseController from './BaseController';
 import Transaction from './../../models/Transaction';
 import UserSubscription from './../../models/UserSubscription';
+import User from './../../models/User';
+import Subscription from './../../models/Subscription';
 import dotenv from 'dotenv';
 import { INITIATED, COMPLETED } from '../../config/enums';
 import PaymentService from './../../services/PaymentService';
+import moment from 'moment';
 
 dotenv.config();
 
@@ -90,17 +93,39 @@ class TransactionController extends BaseController{
   async verifyTransaction(req, res){
     const { reference, userId } = req.body;
     try{
-        let service = new PaymentService('paystack');
+        let service = new PaymentService('rave');
         let result = await service.verifyTransaction(reference);
-        
+        let user = await User.findOne({_id: userId}).populate('userSubscription').exec();
         if(result){
             let transaction = await Transaction.findOne({reference}).populate('user').populate('subscription').exec();
             if(transaction.subscription.amount >= result.amount){
                 //get the user here
                 transaction.amount = transaction.subscription.amount;
                 transaction.status = COMPLETED;
-
+                if(user.userSubscription){
+                  if(user.userSubscription.subscription == transaction.subscription._id){
+                    
+                  }
+                  let userSubscription = new UserSubscription({
+                    subscription: transaction.subscription,
+                    user: userId, startDate: moment(), endDate: moment().add('days', transaction.subscription.duration)
+                  })
+                  await userSubscription.save();
+                  user.userSubscription = userSubscription;
+                  await user.save();
+                  return super.success(res, userSubscription, 'Subscription Successful');
+                }else{
+                  let userSubscription = new UserSubscription({
+                    subscription: transaction.subscription,
+                    user: userId, startDate: moment(), endDate: moment().add(transaction.subscription.duration, 'days')
+                  })
+                  await userSubscription.save();
+                  user.userSubscription = userSubscription;
+                  await user.save();
+                  return super.success(res, userSubscription, 'Subscription Successful');
+                }
                 // check if user already has subscription if yes, check the type, if same update else create new
+                let userSub = await UserSubscription.find({user: userId});
                 await transaction.save();
             }
         }
