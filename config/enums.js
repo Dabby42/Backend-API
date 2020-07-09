@@ -31,7 +31,8 @@ const enums = {
     PROVIDER: ['facebook', 'twitter', 'instagram', 'email'],
     FACEBOOK: 'facebook',
     TWITTER: 'twitter',
-    INSTAGRAM: 'instagram'
+    INSTAGRAM: 'instagram',
+    GOOGLE: 'google'
 };
 
 module.exports = enums;

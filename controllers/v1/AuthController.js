@@ -7,9 +7,13 @@ import Social from './../../models/Social';
 import dotenv from 'dotenv';
 import axios from 'axios'; 
 import secrets from './../../config/secrets';
-import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
+import {FACEBOOK, TWITTER, INSTAGRAM, GOOGLE} from './../../config/enums';
 import Twitter from 'twitter-lite';
 // const {AuthorizationCode} = require('simple-oauth2');
+import {OAuth2Client} from 'google-auth-library';
+
+const client = new OAuth2Client(secrets.googleClientId);
+
 const oauth = require('axios-oauth-client');
 dotenv.config();
 
@@ -150,18 +154,22 @@ class AuthController extends BaseController{
           result = await this.authenticateInstagram(req, res);
           break
 
+        case GOOGLE:
+          result = await this.authenticateGoogle(req, res);
+          break
+
         default:
           result = await this.authenticateFacebook(req, res);
       }
 
       //check if result returns required data
       if(!result) return super.unauthorized(res, 'Authentication could not be completed');
-      const {firstName, email, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
+      const {firstName, email, lastName, avatar, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
       
       let user = await User.findOne({email, provider});
 
       if(!user){
-        user = new User({email, firstName, lastName, provider, socialId});
+        user = new User({email, firstName, avatar, lastName, provider, socialId});
         await user.save()
       } 
       // also add the claims here when the role management is setup
@@ -177,18 +185,19 @@ class AuthController extends BaseController{
       req.body.userId = user._id;
 
       user = await user.save();
-      let social = await Social.findOne({user: user._id, provider, socialId});
+      // let social = await Social.findOne({user: user._id, provider, socialId});
       
-      if(!social){
-        social = new Social({user, firstName, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId, provider })
-        social.save();
-      }else{
-        social.longLivedAccessToken = longLivedAccessToken;
-        social.longLivedAccessTokenSecret =longLivedAccessTokenSecret;
-        social.firstName = firstName;
-        social.lastName = lastName;
-        social.save();
-      }
+      // if(!social){
+      //   social = new Social({user, firstName, lastName, avatar, longLivedAccessToken, longLivedAccessTokenSecret, socialId, provider })
+      //   social.save();
+      // }else{
+      //   social.longLivedAccessToken = longLivedAccessToken;
+      //   social.longLivedAccessTokenSecret =longLivedAccessTokenSecret;
+      //   social.firstName = firstName;
+      //   social.lastName = lastName;
+      //   social.avatar = avatar;
+      //   social.save();
+      // }
 
       return super.success(res,{ token, user, refreshToken, roles, claims }, 'Authentication Successful');
 
@@ -323,6 +332,34 @@ class AuthController extends BaseController{
       } else {
         throw new Error('Couldnt authenticate user')
       }
+    } catch (err) {
+      console.log(err);
+      throw new Error('Couldnt authenticate user')
+    }
+
+  }
+
+  /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   */
+  async authenticateGoogle(req, res){
+    
+    // write google implementation for log in and implement long lived token
+
+    try {
+      const {accessToken} = req.body;
+
+      const ticket = await client.verifyIdToken({
+          idToken: accessToken,
+          audience: secrets.googleClientId
+      });
+
+      const payload = ticket.getPayload();
+      const {email, picture: avatar, given_name: lastName, family_name: firstName, sub: socialId} = payload;
+      return {email, avatar, lastName, firstName, socialId};
+
     } catch (err) {
       console.log(err);
       throw new Error('Couldnt authenticate user')
