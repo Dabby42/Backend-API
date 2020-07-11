@@ -79,6 +79,9 @@ app.use('/v1/transaction', require('./routes/v1/TransactionRoute'));
 // Socials
 app.use('/v1/social', require('./routes/v1/SocialRoute'));
 
+// Keyword
+app.use('/v1/keyword', require('./routes/v1/KeywordRoute'));
+
 //default landing:
 app.all('*', (req, res) => {
   res.status(404).send({

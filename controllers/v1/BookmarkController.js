@@ -32,7 +32,7 @@ class BookmarkController extends BaseController{
 
             let bookmark = await Bookmark.findOne({user: userId, article: articleId});
             if(bookmark){
-                return super.success(res, Bookmark, 'Created Bookmark Successfully');
+                return super.success(res, Bookmark, 'Bookmark exist already');
             }
             bookmark = new Bookmark({article: articleId, user: userId});
             await bookmark.save()

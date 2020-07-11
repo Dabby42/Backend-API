@@ -4,7 +4,7 @@ import Settings from './../../models/Settings';
 import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
 import apn from "apn";
 import gcm from 'node-gcm';
-import apnOptions from './../../config/apnOptions';
+// import apnOptions from './../../config/apnOptions';
 import secrets from './../../config/secrets';
 
 // let service = new apn.Provider(apnOptions);

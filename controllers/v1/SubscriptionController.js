@@ -25,13 +25,13 @@ class SubscriptionController extends BaseController{
    * @apiParam {Number} amount Subscription Amount
    */
   async createSubscription(req, res) {
-    let {name, description, keywords, mentions, socialAccounts, userId, shares, duration, amount} = req.body;
+    let {name, description, keywords, mentions, socialAccounts, user, shares, duration, amount} = req.body;
 
     try{
 
         let subscription = new Subscription({
             name, description, keywords, mentions, 
-            socialAccounts, userId, shares, duration, 
+            socialAccounts, user, shares, duration, 
             amount
         });
         await subscription.save();
@@ -157,7 +157,7 @@ class SubscriptionController extends BaseController{
 
     }catch(err){
         console.log(err);
-        return super.actionFailure(res, `Couldn't restored subscription`);
+        return super.actionFailure(res, `Couldn't restore subscription`);
     }
   }
 
