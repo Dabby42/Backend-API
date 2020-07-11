@@ -12,7 +12,7 @@ class Instagram{
         const {longLivedAccessToken, firstName, lastName} = data;
         try{
             let result = await axios.get(`${secrets.instagramBaseUrl}/me/media?fields=timestamp,media_url,caption&access_token=${longLivedAccessToken}`);
-
+            console.log(result.data.data, `${secrets.instagramBaseUrl}/me/media?fields=timestamp,media_url,caption&access_token=${longLivedAccessToken}`);
             let preparedResult = result.data.data.map((item, index) => {
                 item.createdAt = item.timestamp;
                 item.firstName = firstName;

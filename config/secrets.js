@@ -50,6 +50,8 @@ const secrets = {
   twitterCallbackUri: process.env.TWITTER_CALLBACK_URI,
   twitterBaseUrl: process.env.TWITTER_BASE_URL,
 
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
+
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY,
   paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY,
   paystackBaseUrl: process.env.PAYSTACK_BASE_URL,

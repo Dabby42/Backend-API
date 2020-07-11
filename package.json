@@ -36,6 +36,7 @@
         "express-validator": "^5.3.1",
         "fs": "0.0.1-security",
         "gatemanjs": "franko4don/gateman#master",
+        "google-auth-library": "^6.0.4",
         "is-base64": "^0.1.0",
         "jsonwebtoken": "^8.4.0",
         "method-override": "^3.0.0",

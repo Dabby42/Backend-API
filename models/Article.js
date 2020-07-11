@@ -12,6 +12,7 @@ let ArticleSchema = mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
+  interest: { type: mongoose.Schema.Types.ObjectId, ref: "Interest", required: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 

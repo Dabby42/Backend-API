@@ -50,7 +50,7 @@ class VerifyTokenMiddleware extends Middleware{
     verifyRefreshToken(req, res, next) {
         const {refreshToken, email, id} = req.body;
         if (!refreshToken)
-            return super.forbidden(res, 'No token provided.');
+            return super.unauthorized(res, 'No token provided.');
         jwt.verify(refreshToken, secrets.jwtRefreshSecret, (err, decoded) => {
       
             if (err)

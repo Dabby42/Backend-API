@@ -10,3 +10,4 @@ public/vendor/*
 public/utils/
 public/locales
 public/fonts
+/logs/access.log

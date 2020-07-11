@@ -169,6 +169,14 @@ class Helpers {
     return res.status(HTTP_FORBIDDEN).send(response)
   }
 
+  /**
+   * @param {var} s
+   */
+  isValidUrl(s){
+    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    return regexp.test(s);
+  };
+
    /**
    * 
    * @param {object} res 
@@ -180,6 +188,24 @@ class Helpers {
             data,
             status: SUCCESS,
             status_code: HTTP_OK, 
+            message
+            
+    }
+    return res.status(HTTP_OK).send(response);
+  }
+
+  /**
+   * 
+   * @param {object} res 
+   * @param {string} message 
+   * Formats response for successful action that requires data to be returned
+   */
+  successPaginated(res, data, meta={}, message = 'successful'){
+    let response = {
+            data,
+            status: SUCCESS,
+            status_code: HTTP_OK, 
+            meta,
             message
             
     }

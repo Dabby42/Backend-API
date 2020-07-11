@@ -7,9 +7,13 @@ import Social from './../../models/Social';
 import dotenv from 'dotenv';
 import axios from 'axios'; 
 import secrets from './../../config/secrets';
-import {FACEBOOK, TWITTER, INSTAGRAM} from './../../config/enums';
+import {FACEBOOK, TWITTER, INSTAGRAM, GOOGLE} from './../../config/enums';
 import Twitter from 'twitter-lite';
-const {AuthorizationCode} = require('simple-oauth2');
+// const {AuthorizationCode} = require('simple-oauth2');
+import {OAuth2Client} from 'google-auth-library';
+
+const client = new OAuth2Client(secrets.googleClientId);
+
 const oauth = require('axios-oauth-client');
 dotenv.config();
 
@@ -20,14 +24,91 @@ class AuthController extends BaseController{
     autoBind(this);
   }
   /**
-   * @api {post} v1/auth/register Authenticate User
-   * @apiName Authenticate User
+   * @api {post} v1/auth/login Login User with email and password
+   * @apiName Login User with email and password
    * @apiGroup Auth
    * @apiParam {String} email user's email
    * @apiParam {String} password user's password
    */
+  login = async (req, res) => {
+    const { email, password, provider } = req.body;
+    try{
+      let user = await User.findOne({ email, provider });
+   
+      if(user){
+        const {firstName, email, _id, lastName} = user;
+        let isPasswordValid = bcrypt.compareSync(password, user.password);
+       
+          if (isPasswordValid) {
+
+            if(!user.isActive) return super.actionFailure(res, 'Account has been deactivated');
+
+            // also add the claims here when the role management is setup
+            let roles = await user.getRolesForUser();
+            let claims = await user.getClaimsForUser();
+            
+            // generate short lived token
+            let token = jwt.sign({ firstName, email, id: _id, roles, claims, lastName },secrets.jwtSecret,{expiresIn: secrets.jwtTtl});
+            // genrates refresh long lived token
+            
+            let refreshToken = jwt.sign({ email, id: _id }, secrets.jwtRefreshSecret,{expiresIn: secrets.jwtRefreshTtl });
+            
+            user.refreshToken = refreshToken;
+            req.body.userId = _id;
+            user = await user.save();
+            return super.success(res,{ token, user, refreshToken, roles, claims }, 'Login Successful');
+
+          } else {
+            return super.unauthorized(res, 'Invalid Credentials');
+          }
+      }else{
+        return super.notFound(res, "Account does not exist");
+      }
+    }catch(err){
+        console.log(err);
+        return super.unauthorized(res, 'Invalid Credentials 1');
+    }
+  }
+  
+
+  /**
+   * @api {post} v1/auth/register Authenticate User
+   * @apiName Authenticate User
+   * @apiGroup Auth
+   * @apiParam {String} email user's email
+   * @apiParam {String} firstName user's firstName
+   * @apiParam {String} lastName user's lastName
+   * @apiParam {String} provider provider
+   * @apiParam {String} password user's password
+   */
   async register(req, res) {
+     
+    const { email, password, firstName, provider, lastName} = req.body;
+        
+    let hashedPassword = bcrypt.hashSync(password, 8);
     
+    let user = new User({
+        email, password: hashedPassword, firstName, lastName, 
+        provider
+    });
+    
+    try{
+      let newUser = await user.save();
+        // also add the claims here when the role management is setup
+      let roles = await user.getRolesForUser();
+      let claims = await user.getClaimsForUser();
+      
+      // generate short lived token
+      let token = jwt.sign({ firstName, email, id: user._id, roles, claims, lastName },secrets.jwtSecret,{expiresIn: secrets.jwtTtl});
+      // genrates refresh long lived token
+      let refreshToken = jwt.sign({ email, id: user._id }, secrets.jwtRefreshSecret,{expiresIn: secrets.jwtRefreshTtl });
+      
+      return super.success(res,{ token, user, refreshToken, roles, claims }, 'Registration Successful');
+        
+    }catch(error){
+        console.log(error);
+        return super.actionFailure(res, 'Something went wrong')
+    }
   }
 
   /**
@@ -73,18 +154,22 @@ class AuthController extends BaseController{
           result = await this.authenticateInstagram(req, res);
           break
 
+        case GOOGLE:
+          result = await this.authenticateGoogle(req, res);
+          break
+
         default:
           result = await this.authenticateFacebook(req, res);
       }
 
       //check if result returns required data
       if(!result) return super.unauthorized(res, 'Authentication could not be completed');
-      const {firstName, email, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
+      const {firstName, email, lastName, avatar, longLivedAccessToken, longLivedAccessTokenSecret, socialId} = result;
       
       let user = await User.findOne({email, provider});
 
       if(!user){
-        user = new User({email, firstName, lastName, provider, socialId});
+        user = new User({email, firstName, avatar, lastName, provider, socialId});
         await user.save()
       } 
       // also add the claims here when the role management is setup
@@ -100,18 +185,19 @@ class AuthController extends BaseController{
       req.body.userId = user._id;
 
       user = await user.save();
-      let social = await Social.findOne({user: user._id, provider, socialId});
+      // let social = await Social.findOne({user: user._id, provider, socialId});
       
-      if(!social){
-        social = new Social({user, firstName, lastName, longLivedAccessToken, longLivedAccessTokenSecret, socialId, provider })
-        social.save();
-      }else{
-        social.longLivedAccessToken = longLivedAccessToken;
-        social.longLivedAccessTokenSecret =longLivedAccessTokenSecret;
-        social.firstName = firstName;
-        social.lastName = lastName;
-        social.save();
-      }
+      // if(!social){
+      //   social = new Social({user, firstName, lastName, avatar, longLivedAccessToken, longLivedAccessTokenSecret, socialId, provider })
+      //   social.save();
+      // }else{
+      //   social.longLivedAccessToken = longLivedAccessToken;
+      //   social.longLivedAccessTokenSecret =longLivedAccessTokenSecret;
+      //   social.firstName = firstName;
+      //   social.lastName = lastName;
+      //   social.avatar = avatar;
+      //   social.save();
+      // }
 
       return super.success(res,{ token, user, refreshToken, roles, claims }, 'Authentication Successful');
 
@@ -232,21 +318,50 @@ class AuthController extends BaseController{
   async authenticateInstagram(req, res){
     
     // write instagram implementation for log in and implement long lived token
-    
+
     try {
-      const {accessToken} = req.body;
+      const {accessToken, email} = req.body;
       
       let longLivedToken = await axios.get(`${secrets.instagramBaseUrl}/access_token?grant_type=ig_exchange_token&client_secret=${secrets.instagramAppSecret}&access_token=${accessToken}`)
-      
+      console.log(longLivedToken.data);
       if (longLivedToken) {
         let profile = await axios.get(`${secrets.instagramBaseUrl}/me?fields=id,username&access_token=${longLivedToken.data.access_token}`);
         const {username, id} = profile.data;
-        let email ="dabbyvalentino@yahoo.com";
+
         return {socialId: id, email, longLivedAccessToken: longLivedToken.data.access_token,  firstName: username, lastName: username }
       } else {
         throw new Error('Couldnt authenticate user')
       }
     } catch (err) {
+      console.log(err);
+      throw new Error('Couldnt authenticate user')
+    }
+
+  }
+
+  /**
+   * 
+   * @param {Object} req 
+   * @param {Object} res 
+   */
+  async authenticateGoogle(req, res){
+    
+    // write google implementation for log in and implement long lived token
+
+    try {
+      const {accessToken} = req.body;
+
+      const ticket = await client.verifyIdToken({
+          idToken: accessToken,
+          audience: secrets.googleClientId
+      });
+
+      const payload = ticket.getPayload();
+      const {email, picture: avatar, given_name: lastName, family_name: firstName, sub: socialId} = payload;
+      return {email, avatar, lastName, firstName, socialId};
+
+    } catch (err) {
+      console.log(err);
       throw new Error('Couldnt authenticate user')
     }
 

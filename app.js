@@ -81,6 +81,11 @@ app.use('/v1/social', require('./routes/v1/SocialRoute'));
 
 // Keyword
 app.use('/v1/keyword', require('./routes/v1/KeywordRoute'));
+// Roles
+app.use('/v1/role', require('./routes/v1/RoleRoute'));
+
+// User
+app.use('/v1/user', require('./routes/v1/UserRoute'));
 
 //default landing:
 app.all('*', (req, res) => {
@@ -96,6 +101,7 @@ dotenv.config();
 let seed = new Seed();
 
 seed.seedInterest();
+seed.seedRole();
 
 //=========================================================
 //Running the server on Port 3000 default
